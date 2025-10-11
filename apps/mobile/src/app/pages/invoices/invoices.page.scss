@@ -1,0 +1,11 @@
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  p {
+    color: var(--ion-color-medium);
+    font-size: 16px;
+  }
+}

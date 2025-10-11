@@ -1,0 +1,19 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/sales"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalle de Venta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Venta #{{ saleId }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p>Detalles de la venta se cargarán aquí</p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

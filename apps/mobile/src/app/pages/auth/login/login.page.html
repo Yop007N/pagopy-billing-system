@@ -1,0 +1,74 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Iniciar Sesión</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="login-container">
+    <div class="logo-section">
+      <h1>PagoPy</h1>
+      <p>Sistema de Facturación Electrónica</p>
+    </div>
+
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Bienvenido</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <form (ngSubmit)="onLogin()">
+          <ion-item>
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            <ion-input
+              type="email"
+              placeholder="Correo electrónico"
+              [(ngModel)]="credentials.email"
+              name="email"
+              required
+              [disabled]="loading"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-input
+              type="password"
+              placeholder="Contraseña"
+              [(ngModel)]="credentials.password"
+              name="password"
+              required
+              [disabled]="loading"
+            ></ion-input>
+          </ion-item>
+
+          <ion-text color="danger" *ngIf="errorMessage">
+            <p class="error-message">{{ errorMessage }}</p>
+          </ion-text>
+
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="loading || !credentials.email || !credentials.password"
+            class="login-button"
+          >
+            <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+            <span *ngIf="!loading">
+              <ion-icon name="log-in-outline" slot="start"></ion-icon>
+              Iniciar Sesión
+            </span>
+          </ion-button>
+
+          <div class="register-link">
+            <ion-text color="medium">
+              ¿No tienes cuenta?
+            </ion-text>
+            <ion-button fill="clear" (click)="goToRegister()">
+              Registrarse
+            </ion-button>
+          </div>
+        </form>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>

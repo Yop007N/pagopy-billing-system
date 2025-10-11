@@ -1,0 +1,38 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>Mis Ventas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-list *ngIf="sales.length > 0; else noSales">
+    <ion-item
+      *ngFor="let sale of sales"
+      button
+      (click)="goToSaleDetail(sale.id)"
+    >
+      <ion-label>
+        <h2>{{ sale.customer }}</h2>
+        <h3>{{ sale.amount | number:'1.0-0' }} Gs.</h3>
+        <p>{{ sale.date }}</p>
+      </ion-label>
+      <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+    </ion-item>
+  </ion-list>
+
+  <ng-template #noSales>
+    <div class="empty-state">
+      <p>No hay ventas registradas</p>
+      <ion-button (click)="goToNewSale()">
+        <ion-icon name="add-outline" slot="start"></ion-icon>
+        Crear Primera Venta
+      </ion-button>
+    </div>
+  </ng-template>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="goToNewSale()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

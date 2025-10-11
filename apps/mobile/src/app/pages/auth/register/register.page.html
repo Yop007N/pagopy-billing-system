@@ -1,0 +1,65 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/auth/login"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Registrarse</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <ion-card>
+    <ion-card-content>
+      <form (ngSubmit)="onRegister()">
+        <ion-item>
+          <ion-input
+            label="Nombre completo"
+            labelPlacement="floating"
+            type="text"
+            [(ngModel)]="userData.name"
+            name="name"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Correo electrónico"
+            labelPlacement="floating"
+            type="email"
+            [(ngModel)]="userData.email"
+            name="email"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Contraseña"
+            labelPlacement="floating"
+            type="password"
+            [(ngModel)]="userData.password"
+            name="password"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-input
+            label="Confirmar contraseña"
+            labelPlacement="floating"
+            type="password"
+            [(ngModel)]="userData.confirmPassword"
+            name="confirmPassword"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <ion-button expand="block" type="submit" class="register-button">
+          <ion-icon name="person-add-outline" slot="start"></ion-icon>
+          Crear Cuenta
+        </ion-button>
+      </form>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

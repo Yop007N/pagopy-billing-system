@@ -1,0 +1,7 @@
+{
+  "name": "PagoPy Mobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

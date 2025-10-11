@@ -1,0 +1,252 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+  QR
+  BANCARD
+  SIPAP
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum UserRole {
+  ADMIN
+  SELLER
+  CASHIER
+  VIEWER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum SaleStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String
+  lastName  String
+  role      UserRole @default(SELLER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  sales Sale[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Customer {
+  id           String       @id @default(cuid())
+  type         CustomerType
+  documentType String // RUC, CI, Pasaporte
+  documentId   String       @unique
+  name         String
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  country      String       @default("Paraguay")
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  sales Sale[]
+
+  @@index([documentId])
+  @@index([email])
+  @@map("customers")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(12, 2)
+  cost        Decimal? @db.Decimal(12, 2)
+  stock       Int      @default(0)
+  taxRate     Decimal  @default(10) @db.Decimal(5, 2) // IVA 10%
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  saleItems SaleItem[]
+
+  @@index([code])
+  @@index([isActive])
+  @@map("products")
+}
+
+model Sale {
+  id            String     @id @default(cuid())
+  saleNumber    String     @unique
+  status        SaleStatus @default(PENDING)
+  subtotal      Decimal    @db.Decimal(12, 2)
+  tax           Decimal    @db.Decimal(12, 2)
+  discount      Decimal    @default(0) @db.Decimal(12, 2)
+  total         Decimal    @db.Decimal(12, 2)
+  paymentMethod PaymentMethod
+  notes         String?
+  saleDate      DateTime   @default(now())
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  // Foreign keys
+  userId     String
+  customerId String?
+
+  // Relations
+  user     User       @relation(fields: [userId], references: [id])
+  customer Customer?  @relation(fields: [customerId], references: [id])
+  items    SaleItem[]
+  payment  Payment?
+  invoice  Invoice?
+
+  @@index([saleNumber])
+  @@index([userId])
+  @@index([customerId])
+  @@index([status])
+  @@index([saleDate])
+  @@map("sales")
+}
+
+model SaleItem {
+  id        String   @id @default(cuid())
+  quantity  Int
+  unitPrice Decimal  @db.Decimal(12, 2)
+  taxRate   Decimal  @db.Decimal(5, 2)
+  subtotal  Decimal  @db.Decimal(12, 2)
+  tax       Decimal  @db.Decimal(12, 2)
+  total     Decimal  @db.Decimal(12, 2)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign keys
+  saleId    String
+  productId String
+
+  // Relations
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_items")
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  amount            Decimal       @db.Decimal(12, 2)
+  method            PaymentMethod
+  status            PaymentStatus @default(PENDING)
+  transactionId     String?       @unique
+  transactionData   Json? // Metadata from payment gateway
+  bankReference     String?
+  processorResponse Json? // Response from Bancard/SIPAP
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // Foreign keys
+  saleId String @unique
+
+  // Relations
+  sale Sale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
+  @@index([status])
+  @@map("payments")
+}
+
+model Invoice {
+  id               String        @id @default(cuid())
+  invoiceNumber    String        @unique
+  status           InvoiceStatus @default(DRAFT)
+  timbradoNumber   String? // Número de timbrado SET
+  cdc              String?       @unique // Código de Control (e-Kuatia)
+  qrCode           String? // QR code data
+  xmlFile          String? // Path to XML file
+  kude             String? // KUDE (Código Único de Documento Electrónico)
+  setResponse      Json? // Response from SET e-Kuatia
+  setApprovedAt    DateTime?
+  sentToCustomerAt DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  // Foreign keys
+  saleId String @unique
+
+  // Relations
+  sale Sale @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceNumber])
+  @@index([cdc])
+  @@index([status])
+  @@map("invoices")
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  entity    String // Model name
+  entityId  String // Record ID
+  action    String // CREATE, UPDATE, DELETE
+  oldData   Json?
+  newData   Json?
+  userId    String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

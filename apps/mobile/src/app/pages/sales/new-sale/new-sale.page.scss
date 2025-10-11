@@ -1,0 +1,77 @@
+ion-card {
+  margin-bottom: 16px;
+}
+
+.item-row {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ion-color-light);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.item-details {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+
+  .item-field {
+    flex: 1;
+  }
+
+  .item-total {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    min-width: 100px;
+
+    .total-label {
+      font-size: 12px;
+      color: var(--ion-color-medium);
+    }
+
+    .total-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+    }
+  }
+}
+
+.remove-btn {
+  margin-top: 8px;
+}
+
+.total-card {
+  background: var(--ion-color-primary);
+  color: white;
+
+  .total-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .total-label {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .total-amount {
+      font-size: 28px;
+      font-weight: bold;
+    }
+  }
+}
+
+.action-buttons {
+  margin: 24px 0;
+
+  ion-button {
+    height: 56px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+}

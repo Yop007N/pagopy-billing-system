@@ -1,0 +1,144 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/tabs/sales"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Nueva Venta</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Customer Info -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Datos del Cliente</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <ion-item>
+        <ion-input
+          label="Nombre del Cliente"
+          labelPlacement="floating"
+          [(ngModel)]="sale.customerName"
+          required
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-input
+          label="RUC (Opcional)"
+          labelPlacement="floating"
+          [(ngModel)]="sale.customerRuc"
+          type="text"
+        ></ion-input>
+      </ion-item>
+
+      <ion-item>
+        <ion-select
+          label="Método de Pago"
+          labelPlacement="floating"
+          [(ngModel)]="sale.paymentMethod"
+        >
+          <ion-select-option value="cash">Efectivo</ion-select-option>
+          <ion-select-option value="card">Tarjeta</ion-select-option>
+          <ion-select-option value="transfer">Transferencia</ion-select-option>
+          <ion-select-option value="credit">Crédito</ion-select-option>
+        </ion-select>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Items -->
+  <ion-card>
+    <ion-card-header>
+      <ion-card-title>Productos/Servicios</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <div *ngFor="let item of items; let i = index" class="item-row">
+        <ion-item>
+          <ion-input
+            label="Descripción"
+            labelPlacement="floating"
+            [(ngModel)]="item.description"
+            required
+          ></ion-input>
+        </ion-item>
+
+        <div class="item-details">
+          <ion-item class="item-field">
+            <ion-input
+              label="Cant."
+              labelPlacement="floating"
+              type="number"
+              [(ngModel)]="item.quantity"
+              (ngModelChange)="updateItemTotal(item)"
+              min="1"
+            ></ion-input>
+          </ion-item>
+
+          <ion-item class="item-field">
+            <ion-input
+              label="Precio"
+              labelPlacement="floating"
+              type="number"
+              [(ngModel)]="item.price"
+              (ngModelChange)="updateItemTotal(item)"
+              min="0"
+            ></ion-input>
+          </ion-item>
+
+          <div class="item-total">
+            <span class="total-label">Total:</span>
+            <span class="total-value">{{ item.total | number:'1.0-0' }} Gs.</span>
+          </div>
+        </div>
+
+        <ion-button
+          *ngIf="items.length > 1"
+          fill="clear"
+          color="danger"
+          (click)="removeItem(i)"
+          class="remove-btn"
+        >
+          <ion-icon name="trash-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <ion-button expand="block" fill="outline" (click)="addItem()">
+        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        Agregar Producto
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Notes -->
+  <ion-card>
+    <ion-card-content>
+      <ion-item>
+        <ion-textarea
+          label="Notas (Opcional)"
+          labelPlacement="floating"
+          [(ngModel)]="sale.notes"
+          rows="3"
+        ></ion-textarea>
+      </ion-item>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Total -->
+  <ion-card class="total-card">
+    <ion-card-content>
+      <div class="total-section">
+        <span class="total-label">Total a Pagar:</span>
+        <span class="total-amount">{{ getTotal() | number:'1.0-0' }} Gs.</span>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Actions -->
+  <div class="action-buttons">
+    <ion-button expand="block" size="large" (click)="saveSale()">
+      <ion-icon name="save-outline" slot="start"></ion-icon>
+      Guardar Venta
+    </ion-button>
+  </div>
+</ion-content>
