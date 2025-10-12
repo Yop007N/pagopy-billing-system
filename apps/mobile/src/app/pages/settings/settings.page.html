@@ -1,0 +1,229 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Configuración</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-list>
+    <!-- Notifications Section -->
+    <ion-list-header>
+      <ion-icon name="notifications-outline" slot="start"></ion-icon>
+      <ion-label>Notificaciones</ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-label>Notificaciones Activadas</ion-label>
+      <ion-toggle
+        [checked]="settings().notifications.enabled"
+        (ionChange)="onNotificationToggleChange('enabled')"
+      ></ion-toggle>
+    </ion-item>
+
+    <ion-item [disabled]="!settings().notifications.enabled">
+      <ion-label>
+        <h3>Ventas Offline</h3>
+        <p>Notificar cuando se guarde una venta sin conexión</p>
+      </ion-label>
+      <ion-toggle
+        [checked]="settings().notifications.offlineSales"
+        (ionChange)="onNotificationToggleChange('offlineSales')"
+      ></ion-toggle>
+    </ion-item>
+
+    <ion-item [disabled]="!settings().notifications.enabled">
+      <ion-label>
+        <h3>Sincronización</h3>
+        <p>Notificar cuando se complete la sincronización</p>
+      </ion-label>
+      <ion-toggle
+        [checked]="settings().notifications.syncCompleted"
+        (ionChange)="onNotificationToggleChange('syncCompleted')"
+      ></ion-toggle>
+    </ion-item>
+
+    <ion-item [disabled]="!settings().notifications.enabled">
+      <ion-label>
+        <h3>Errores Críticos</h3>
+        <p>Notificar sobre errores importantes</p>
+      </ion-label>
+      <ion-toggle
+        [checked]="settings().notifications.criticalErrors"
+        (ionChange)="onNotificationToggleChange('criticalErrors')"
+      ></ion-toggle>
+    </ion-item>
+
+    <ion-item [disabled]="!settings().notifications.enabled">
+      <ion-label>
+        <h3>Sonido</h3>
+        <p>Reproducir sonido en notificaciones</p>
+      </ion-label>
+      <ion-toggle
+        [checked]="settings().notifications.sound"
+        (ionChange)="onNotificationToggleChange('sound')"
+      ></ion-toggle>
+    </ion-item>
+
+    <ion-item [disabled]="!settings().notifications.enabled">
+      <ion-label>
+        <h3>Vibración</h3>
+        <p>Vibrar al recibir notificaciones</p>
+      </ion-label>
+      <ion-toggle
+        [checked]="settings().notifications.vibration"
+        (ionChange)="onNotificationToggleChange('vibration')"
+      ></ion-toggle>
+    </ion-item>
+
+    <!-- Printer Section -->
+    <ion-list-header>
+      <ion-icon name="print-outline" slot="start"></ion-icon>
+      <ion-label>Impresora Bluetooth</ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-label>Impresora Habilitada</ion-label>
+      <ion-toggle
+        [checked]="settings().printer.enabled"
+        (ionChange)="onPrinterToggle()"
+      ></ion-toggle>
+    </ion-item>
+
+    <ion-item [disabled]="!settings().printer.enabled">
+      <ion-label>
+        <h3>Dispositivo</h3>
+        <p *ngIf="settings().printer.deviceName">{{ settings().printer.deviceName }}</p>
+        <p *ngIf="!settings().printer.deviceName">No configurado</p>
+      </ion-label>
+      <ion-button slot="end" fill="outline" (click)="configurePrinter()">
+        <ion-icon name="bluetooth-outline" slot="start"></ion-icon>
+        Configurar
+      </ion-button>
+    </ion-item>
+
+    <ion-item [disabled]="!settings().printer.enabled">
+      <ion-label>Ancho de Papel</ion-label>
+      <ion-select
+        [value]="settings().printer.paperWidth"
+        (ionChange)="onPaperWidthChange($event)"
+      >
+        <ion-select-option [value]="58">58mm</ion-select-option>
+        <ion-select-option [value]="80">80mm</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Sync Section -->
+    <ion-list-header>
+      <ion-icon name="sync-outline" slot="start"></ion-icon>
+      <ion-label>Sincronización</ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-label>Sincronización Automática</ion-label>
+      <ion-toggle
+        [checked]="settings().sync.autoSync"
+        (ionChange)="onAutoSyncToggle()"
+      ></ion-toggle>
+    </ion-item>
+
+    <ion-item [disabled]="!settings().sync.autoSync">
+      <ion-label>Intervalo</ion-label>
+      <ion-select
+        [value]="settings().sync.syncInterval"
+        (ionChange)="onSyncIntervalChange($event)"
+      >
+        <ion-select-option [value]="15">15 minutos</ion-select-option>
+        <ion-select-option [value]="30">30 minutos</ion-select-option>
+        <ion-select-option [value]="60">1 hora</ion-select-option>
+        <ion-select-option [value]="180">3 horas</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item [disabled]="!settings().sync.autoSync">
+      <ion-label>
+        <h3>Solo con WiFi</h3>
+        <p>Sincronizar solo cuando esté conectado a WiFi</p>
+      </ion-label>
+      <ion-toggle
+        [checked]="settings().sync.syncOnWifiOnly"
+        (ionChange)="onWifiOnlyToggle()"
+      ></ion-toggle>
+    </ion-item>
+
+    <ion-item button (click)="syncNow()">
+      <ion-icon name="sync-outline" slot="start"></ion-icon>
+      <ion-label>
+        <h3>Sincronizar Ahora</h3>
+        <p>Sincronizar datos con el servidor</p>
+      </ion-label>
+    </ion-item>
+
+    <!-- Appearance Section -->
+    <ion-list-header>
+      <ion-icon name="color-palette-outline" slot="start"></ion-icon>
+      <ion-label>Apariencia</ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-label>Tema</ion-label>
+      <ion-select
+        [value]="settings().appearance.theme"
+        (ionChange)="onThemeChange($event)"
+      >
+        <ion-select-option value="light">Claro</ion-select-option>
+        <ion-select-option value="dark">Oscuro</ion-select-option>
+        <ion-select-option value="system">Sistema</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-icon name="language-outline" slot="start"></ion-icon>
+      <ion-label>Idioma</ion-label>
+      <ion-select
+        [value]="settings().appearance.language"
+        (ionChange)="onLanguageChange($event)"
+      >
+        <ion-select-option value="es">Español</ion-select-option>
+        <ion-select-option value="en">English</ion-select-option>
+        <ion-select-option value="gn">Guaraní</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Storage Section -->
+    <ion-list-header>
+      <ion-icon name="trash-outline" slot="start"></ion-icon>
+      <ion-label>Almacenamiento</ion-label>
+    </ion-list-header>
+
+    <ion-item>
+      <ion-label>
+        <h3>Uso de Caché</h3>
+        <p>{{ cacheSize() }}</p>
+      </ion-label>
+    </ion-item>
+
+    <ion-item button (click)="clearCache()">
+      <ion-icon name="trash-outline" slot="start" color="danger"></ion-icon>
+      <ion-label color="danger">
+        <h3>Limpiar Caché</h3>
+        <p>Eliminar datos temporales</p>
+      </ion-label>
+    </ion-item>
+
+    <!-- About Section -->
+    <ion-list-header>
+      <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+      <ion-label>Información</ion-label>
+    </ion-list-header>
+
+    <ion-item button (click)="showAppInfo()">
+      <ion-label>
+        <h3>Acerca de PagoPy</h3>
+        <p>Versión {{ appVersion }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { InvoicesService } from './invoices.service';
+import { PdfGeneratedResponseDto } from './dto/pdf-generated-response.dto';
 
 @ApiTags('invoices')
 @ApiBearerAuth()
@@ -70,12 +71,26 @@ export class InvoicesController {
     return { message: `Send invoice ${id} to customer - To be implemented` };
   }
 
+  @Post(':id/generate-pdf')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Generate PDF invoice' })
+  @ApiResponse({
+    status: 200,
+    description: 'PDF generated successfully',
+    type: PdfGeneratedResponseDto,
+  })
+  @ApiResponse({ status: 404, description: 'Invoice not found' })
+  @ApiResponse({ status: 500, description: 'Internal server error during PDF generation' })
+  async generatePdf(@Param('id') id: string) {
+    return this.invoicesService.generatePdf(id);
+  }
+
   @Get(':id/pdf')
   @ApiOperation({ summary: 'Download invoice as PDF' })
   @ApiResponse({ status: 200, description: 'Return PDF file' })
   @ApiResponse({ status: 404, description: 'Invoice not found' })
   async downloadPdf(@Param('id') id: string) {
-    // TODO: Implement PDF generation
+    // TODO: Implement PDF download/streaming
     return { message: `Download invoice ${id} PDF - To be implemented` };
   }
 

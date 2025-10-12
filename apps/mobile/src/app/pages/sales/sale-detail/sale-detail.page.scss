@@ -1,1 +1,143 @@
-// Sale detail specific styles
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  min-height: 400px;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--ion-color-medium);
+  }
+}
+
+.content-wrapper {
+  padding: 16px;
+}
+
+.sync-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  ion-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+  }
+
+  .sync-status-text {
+    flex: 1;
+
+    strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    p {
+      font-size: 13px;
+      margin: 0;
+      opacity: 0.9;
+    }
+  }
+}
+
+ion-card {
+  margin: 0 0 16px 0;
+
+  ion-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 600;
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+
+  &.total-card {
+    background: var(--ion-color-success);
+    color: white;
+
+    h2 {
+      color: white;
+      font-size: 24px;
+      margin: 0;
+    }
+  }
+}
+
+.no-padding {
+  padding: 0;
+
+  ion-list {
+    padding: 0;
+  }
+}
+
+.payment-info {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.actions-section {
+  margin: 24px 0;
+}
+
+ion-list {
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+
+    ion-label {
+      h2, h3 {
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      p {
+        font-size: 14px;
+        color: var(--ion-color-medium);
+        margin: 2px 0;
+      }
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  min-height: 400px;
+
+  ion-icon {
+    font-size: 80px;
+    margin-bottom: 24px;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+    margin: 0 0 12px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--ion-color-medium);
+    margin: 0 0 24px 0;
+    max-width: 300px;
+  }
+}

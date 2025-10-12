@@ -1,0 +1,87 @@
+<header class="toolbar">
+  <div class="toolbar-left">
+    <button
+      class="menu-toggle"
+      (click)="onMenuToggle()"
+      aria-label="Toggle menu">
+      <span class="material-icons">menu</span>
+    </button>
+
+    <div class="page-title">
+      <h1>Sistema de Facturación</h1>
+    </div>
+  </div>
+
+  <div class="toolbar-right">
+    <!-- Notifications -->
+    <button class="toolbar-btn" aria-label="Notificaciones">
+      <span class="material-icons">notifications</span>
+      <span class="notification-badge">3</span>
+    </button>
+
+    <!-- Settings -->
+    <button class="toolbar-btn" aria-label="Configuración">
+      <span class="material-icons">settings</span>
+    </button>
+
+    <!-- User Profile -->
+    <div class="user-menu-container" *ngIf="currentUser()">
+      <button
+        class="user-menu-trigger"
+        (click)="toggleUserMenu()"
+        [class.active]="showUserMenu()">
+        <div class="user-avatar">
+          <span class="material-icons">account_circle</span>
+        </div>
+        <div class="user-details">
+          <span class="user-name">{{ currentUser()?.name }}</span>
+          <span class="user-role">{{ currentUser()?.role }}</span>
+        </div>
+        <span class="material-icons dropdown-icon">
+          {{ showUserMenu() ? 'expand_less' : 'expand_more' }}
+        </span>
+      </button>
+
+      <!-- Dropdown Menu -->
+      <div class="user-dropdown" *ngIf="showUserMenu()">
+        <div class="dropdown-header">
+          <div class="dropdown-user-info">
+            <span class="dropdown-user-name">{{ currentUser()?.name }}</span>
+            <span class="dropdown-user-email">{{ currentUser()?.email }}</span>
+          </div>
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <button class="dropdown-item">
+          <span class="material-icons">person</span>
+          <span>Mi Perfil</span>
+        </button>
+
+        <button class="dropdown-item">
+          <span class="material-icons">settings</span>
+          <span>Configuración</span>
+        </button>
+
+        <button class="dropdown-item">
+          <span class="material-icons">help</span>
+          <span>Ayuda</span>
+        </button>
+
+        <div class="dropdown-divider"></div>
+
+        <button class="dropdown-item logout" (click)="logout()">
+          <span class="material-icons">logout</span>
+          <span>Cerrar Sesión</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Backdrop for user menu -->
+<div
+  class="menu-backdrop"
+  *ngIf="showUserMenu()"
+  (click)="closeUserMenu()">
+</div>

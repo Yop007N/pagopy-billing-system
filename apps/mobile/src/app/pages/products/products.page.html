@@ -1,0 +1,138 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Productos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="showFilterOptions()">
+        <ion-icon slot="icon-only" name="filter-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Search Bar -->
+  <ion-toolbar>
+    <ion-searchbar
+      [value]="searchQuery()"
+      (ionInput)="onSearchChange($event)"
+      placeholder="Buscar por nombre o código"
+      [debounce]="300"
+      animated="true"
+      showClearButton="always">
+    </ion-searchbar>
+  </ion-toolbar>
+
+  <!-- Filter Chips -->
+  <ion-toolbar *ngIf="selectedFilter() !== 'all' || !showActiveOnly()">
+    <div class="filter-chips">
+      <ion-chip *ngIf="selectedFilter() === 'low-stock'" color="warning">
+        Stock Bajo
+        <ion-icon name="close-circle" (click)="clearFilters()"></ion-icon>
+      </ion-chip>
+      <ion-chip *ngIf="selectedFilter() === 'inactive'" color="medium">
+        Inactivos
+        <ion-icon name="close-circle" (click)="clearFilters()"></ion-icon>
+      </ion-chip>
+      <ion-chip *ngIf="!showActiveOnly()" color="medium">
+        Todos
+        <ion-icon name="close-circle" (click)="toggleActiveFilter()"></ion-icon>
+      </ion-chip>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="onRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Desliza para actualizar"
+      refreshingSpinner="circles"
+      refreshingText="Actualizando...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando productos...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="error-container">
+    <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+    <p>{{ error() }}</p>
+    <ion-button (click)="loadProducts(true)" fill="outline" color="primary">
+      Reintentar
+    </ion-button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && !error() && filteredProducts().length === 0" class="empty-container">
+    <ion-icon name="cube-outline" color="medium"></ion-icon>
+    <h2>No hay productos</h2>
+    <p *ngIf="searchQuery()">
+      No se encontraron productos con "{{ searchQuery() }}"
+    </p>
+    <p *ngIf="!searchQuery()">
+      Agrega tu primer producto para comenzar
+    </p>
+    <ion-button (click)="navigateToNewProduct()" fill="solid" color="primary">
+      <ion-icon slot="start" name="add"></ion-icon>
+      Agregar Producto
+    </ion-button>
+  </div>
+
+  <!-- Products List -->
+  <ion-list *ngIf="!loading() && !error() && filteredProducts().length > 0" lines="full">
+    <ion-item
+      *ngFor="let product of filteredProducts(); trackBy: trackByProductId"
+      button
+      (click)="navigateToProduct(product)"
+      [detail]="true">
+
+      <ion-label>
+        <h2>{{ product.name }}</h2>
+        <p>Código: {{ product.code }}</p>
+        <p *ngIf="product.description" class="product-description">
+          {{ product.description }}
+        </p>
+
+        <div class="product-meta">
+          <ion-badge [color]="getStockColor(product.stock)">
+            Stock: {{ product.stock }}
+          </ion-badge>
+          <ion-badge [color]="getTaxBadgeColor(product.taxRate)">
+            IVA {{ product.taxRate }}%
+          </ion-badge>
+          <ion-badge *ngIf="!product.isActive" color="danger">
+            Inactivo
+          </ion-badge>
+        </div>
+      </ion-label>
+
+      <ion-note slot="end" class="product-price">
+        {{ formatPrice(product.price) }}
+      </ion-note>
+    </ion-item>
+  </ion-list>
+
+  <!-- Infinite Scroll -->
+  <ion-infinite-scroll
+    *ngIf="filteredProducts().length > 0"
+    threshold="100px"
+    (ionInfinite)="onInfiniteScroll($event)">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Cargando más...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
+  <!-- FAB -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="navigateToNewProduct()" color="primary">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

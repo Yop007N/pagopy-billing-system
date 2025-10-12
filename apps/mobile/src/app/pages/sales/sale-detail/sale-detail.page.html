@@ -4,16 +4,179 @@
       <ion-back-button defaultHref="/tabs/sales"></ion-back-button>
     </ion-buttons>
     <ion-title>Detalle de Venta</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="showActions()" *ngIf="sale()">
+        <ion-icon name="ellipsis-vertical" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Venta #{{ saleId }}</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <p>Detalles de la venta se cargarán aquí</p>
-    </ion-card-content>
-  </ion-card>
+<ion-content [fullscreen]="true">
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-state">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando detalle...</p>
+  </div>
+
+  <!-- Sale Detail -->
+  <div *ngIf="!loading() && sale()" class="content-wrapper">
+    <!-- Sync Status Banner -->
+    <ion-card [color]="sale()!.syncStatus === 'error' ? 'danger' : sale()!.syncStatus === 'pending' ? 'warning' : undefined">
+      <ion-card-content>
+        <div class="sync-status-banner">
+          <ion-icon
+            [name]="getSyncStatusIcon(sale()!.syncStatus!)"
+            [color]="sale()!.syncStatus === 'synced' ? 'light' : undefined"
+          ></ion-icon>
+          <div class="sync-status-text">
+            <strong>{{ getSyncStatusText(sale()!.syncStatus!) }}</strong>
+            <p *ngIf="sale()!.syncStatus === 'error'">La venta no pudo sincronizarse con el servidor</p>
+            <p *ngIf="sale()!.syncStatus === 'pending'">La venta se sincronizará cuando haya conexión</p>
+            <p *ngIf="sale()!.syncStatus === 'synced'">La venta está sincronizada con el servidor</p>
+          </div>
+          <ion-button
+            *ngIf="sale()!.syncStatus === 'error' || sale()!.syncStatus === 'pending'"
+            fill="clear"
+            size="small"
+            (click)="retrySync()"
+            [disabled]="!isOnline()"
+          >
+            <ion-icon name="sync-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Customer Information -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="person-outline"></ion-icon>
+          Información del Cliente
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item>
+            <ion-label>
+              <h3>Nombre</h3>
+              <p>{{ sale()!.customerName }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="sale()!.customerDocument">
+            <ion-label>
+              <h3>Documento</h3>
+              <p>{{ sale()!.customerDocument }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-label>
+              <h3>Fecha</h3>
+              <p>{{ sale()!.createdAt | date:'full' }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Payment Information -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon [name]="getPaymentMethodIcon(sale()!.paymentMethod)"></ion-icon>
+          Método de Pago
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="payment-info">
+          <ion-chip color="primary">
+            <ion-icon [name]="getPaymentMethodIcon(sale()!.paymentMethod)"></ion-icon>
+            <ion-label>{{ formatPaymentMethod(sale()!.paymentMethod) }}</ion-label>
+          </ion-chip>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Sale Items -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="receipt-outline"></ion-icon>
+          Items de la Venta
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="no-padding">
+        <ion-list>
+          <ion-item *ngFor="let item of sale()!.items; let i = index">
+            <ion-label>
+              <h2><strong>{{ item.productName }}</strong></h2>
+              <p>Cantidad: {{ item.quantity }} x {{ item.unitPrice | number:'1.0-0' }} Gs.</p>
+              <p *ngIf="item.taxAmount > 0">IVA ({{ item.taxRate }}%): {{ item.taxAmount | number:'1.0-0' }} Gs.</p>
+            </ion-label>
+            <ion-label slot="end" class="ion-text-end">
+              <h3><strong>{{ item.total | number:'1.0-0' }} Gs.</strong></h3>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Sale Total -->
+    <ion-card class="total-card">
+      <ion-card-content>
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              <h2>TOTAL</h2>
+            </ion-col>
+            <ion-col class="ion-text-end">
+              <h2><strong>{{ sale()!.total | number:'1.0-0' }} Gs.</strong></h2>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- IDs Information -->
+    <ion-card *ngIf="sale()!.id || sale()!.localId">
+      <ion-card-header>
+        <ion-card-title>Información de Identificación</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngIf="sale()!.id">
+            <ion-label>
+              <h3>ID del Servidor</h3>
+              <p>{{ sale()!.id }}</p>
+            </ion-label>
+          </ion-item>
+          <ion-item *ngIf="sale()!.localId">
+            <ion-label>
+              <h3>ID Local</h3>
+              <p>{{ sale()!.localId }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Actions -->
+    <div class="actions-section">
+      <ion-button expand="block" (click)="shareSale()">
+        <ion-icon name="share-outline" slot="start"></ion-icon>
+        Compartir
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Not Found State -->
+  <div *ngIf="!loading() && !sale()" class="empty-state">
+    <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+    <h3>Venta no encontrada</h3>
+    <p>No se pudo cargar el detalle de la venta</p>
+    <ion-button routerLink="/tabs/sales">
+      Volver a Ventas
+    </ion-button>
+  </div>
 </ion-content>

@@ -1,0 +1,290 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/customers"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      Detalle del Cliente
+      @if (customer()?._synced === false) {
+        <ion-badge color="warning" class="sync-badge">
+          <ion-icon name="cloudOfflineOutline"></ion-icon>
+          Sin sincronizar
+        </ion-badge>
+      }
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="editCustomer()">
+        <ion-icon slot="icon-only" name="createOutline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="deleteCustomer()">
+        <ion-icon slot="icon-only" name="trashOutline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Segment -->
+  <ion-toolbar>
+    <ion-segment [value]="selectedSegment()" (ionChange)="onSegmentChange($event)">
+      <ion-segment-button value="details">
+        <ion-label>Detalles</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="history">
+        <ion-label>Historial</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando información del cliente...</p>
+    </div>
+  }
+
+  <!-- Customer Details -->
+  @if (!loading() && customer()) {
+    <!-- Header Card with Avatar and Basic Info -->
+    <ion-card class="customer-header-card">
+      <ion-card-content>
+        <div class="customer-header">
+          <ion-avatar [class.business-avatar]="customer()?.customerType === 'BUSINESS'">
+            <div class="avatar-initials">
+              {{ customerInitials() }}
+            </div>
+          </ion-avatar>
+          <div class="customer-basic-info">
+            <h1>{{ customer()?.name }}</h1>
+            <p class="customer-type">
+              <ion-icon [name]="getCustomerTypeIcon(customer()!.customerType)"></ion-icon>
+              {{ getCustomerTypeLabel(customer()!.customerType) }}
+            </p>
+            <ion-badge [color]="customer()?.isActive ? 'success' : 'medium'">
+              {{ customer()?.isActive ? 'Activo' : 'Inactivo' }}
+            </ion-badge>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Details Tab -->
+    @if (selectedSegment() === 'details') {
+      <!-- Contact Information -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Información de Contacto</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            @if (customer()?.phone) {
+              <ion-item>
+                <ion-icon slot="start" name="callOutline" color="primary"></ion-icon>
+                <ion-label>
+                  <p>Teléfono</p>
+                  <h3>{{ customer()?.phone }}</h3>
+                </ion-label>
+                <div slot="end" class="contact-actions">
+                  <ion-button fill="clear" size="small" (click)="callCustomer(customer()!.phone!)">
+                    <ion-icon slot="icon-only" name="callOutline" color="primary"></ion-icon>
+                  </ion-button>
+                  <ion-button fill="clear" size="small" (click)="whatsappCustomer(customer()!.phone!)">
+                    <ion-icon slot="icon-only" name="logoWhatsapp" color="success"></ion-icon>
+                  </ion-button>
+                </div>
+              </ion-item>
+            }
+
+            @if (customer()?.email) {
+              <ion-item>
+                <ion-icon slot="start" name="mailOutline" color="primary"></ion-icon>
+                <ion-label>
+                  <p>Email</p>
+                  <h3>{{ customer()?.email }}</h3>
+                </ion-label>
+                <ion-button fill="clear" size="small" slot="end" (click)="emailCustomer(customer()!.email!)">
+                  <ion-icon slot="icon-only" name="mailOutline" color="primary"></ion-icon>
+                </ion-button>
+              </ion-item>
+            }
+
+            @if (customer()?.address) {
+              <ion-item>
+                <ion-icon slot="start" name="locationOutline" color="primary"></ion-icon>
+                <ion-label>
+                  <p>Dirección</p>
+                  <h3>{{ customer()?.address }}</h3>
+                  @if (customer()?.city) {
+                    <p>{{ customer()?.city }}@if (customer()?.country) {, {{ customer()?.country }}</p>}</p>
+                  }
+                </ion-label>
+                <ion-button
+                  fill="clear"
+                  size="small"
+                  slot="end"
+                  (click)="openMap(customer()!.address!, customer()?.city)"
+                >
+                  <ion-icon slot="icon-only" name="mapOutline" color="primary"></ion-icon>
+                </ion-button>
+              </ion-item>
+            }
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Tax Information -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Información Fiscal</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item>
+              <ion-icon slot="start" name="cardOutline" color="primary"></ion-icon>
+              <ion-label>
+                <p>{{ customer()?.documentType }}</p>
+                <h3>{{ customer()?.documentId }}</h3>
+              </ion-label>
+            </ion-item>
+
+            @if (customer()?.taxId) {
+              <ion-item>
+                <ion-icon slot="start" name="businessOutline" color="primary"></ion-icon>
+                <ion-label>
+                  <p>RUC</p>
+                  <h3>{{ customer()?.taxId }}</h3>
+                </ion-label>
+              </ion-item>
+            }
+
+            @if (customer()?.creditLimit) {
+              <ion-item>
+                <ion-icon slot="start" name="cashOutline" color="primary"></ion-icon>
+                <ion-label>
+                  <p>Límite de Crédito</p>
+                  <h3>{{ formatCurrency(customer()!.creditLimit!) }}</h3>
+                </ion-label>
+              </ion-item>
+            }
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+
+      <!-- Additional Notes -->
+      @if (customer()?.notes) {
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Notas</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <p class="notes-text">{{ customer()?.notes }}</p>
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- System Information -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Información del Sistema</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-list>
+            <ion-item>
+              <ion-icon slot="start" name="calendar" color="medium"></ion-icon>
+              <ion-label>
+                <p>Fecha de Registro</p>
+                <h3>{{ formatDate(customer()!.createdAt) }}</h3>
+              </ion-label>
+            </ion-item>
+
+            <ion-item>
+              <ion-icon slot="start" name="calendar" color="medium"></ion-icon>
+              <ion-label>
+                <p>Última Actualización</p>
+                <h3>{{ formatDate(customer()!.updatedAt) }}</h3>
+              </ion-label>
+            </ion-item>
+          </ion-list>
+        </ion-card-content>
+      </ion-card>
+    }
+
+    <!-- History Tab -->
+    @if (selectedSegment() === 'history') {
+      <!-- Purchase Statistics -->
+      @if (customer()?.totalPurchases !== undefined) {
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Estadísticas de Compras</ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-grid>
+              <ion-row>
+                <ion-col size="6">
+                  <div class="stat-card">
+                    <ion-icon name="receiptOutline" color="primary"></ion-icon>
+                    <h2>{{ customer()?.totalPurchases || 0 }}</h2>
+                    <p>Total Compras</p>
+                  </div>
+                </ion-col>
+                <ion-col size="6">
+                  <div class="stat-card">
+                    <ion-icon name="cashOutline" color="success"></ion-icon>
+                    <h2>{{ formatCurrency(customer()?.totalSpent || 0) }}</h2>
+                    <p>Total Gastado</p>
+                  </div>
+                </ion-col>
+              </ion-row>
+              <ion-row>
+                <ion-col size="6">
+                  <div class="stat-card">
+                    <ion-icon name="cashOutline" color="tertiary"></ion-icon>
+                    <h2>{{ formatCurrency(customer()?.averageTicket || 0) }}</h2>
+                    <p>Ticket Promedio</p>
+                  </div>
+                </ion-col>
+                <ion-col size="6">
+                  <div class="stat-card">
+                    <ion-icon name="calendar" color="secondary"></ion-icon>
+                    <h2>
+                      @if (customer()?.lastPurchaseDate) {
+                        {{ formatDate(customer()!.lastPurchaseDate!) }}
+                      } @else {
+                        N/A
+                      }
+                    </h2>
+                    <p>Última Compra</p>
+                  </div>
+                </ion-col>
+              </ion-row>
+            </ion-grid>
+          </ion-card-content>
+        </ion-card>
+      } @else {
+        <ion-card>
+          <ion-card-content>
+            <div class="empty-state">
+              <ion-icon name="receiptOutline" size="large"></ion-icon>
+              <h2>Sin Historial</h2>
+              <p>Este cliente aún no ha realizado compras.</p>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      }
+
+      <!-- Recent Purchases List -->
+      <ion-card>
+        <ion-card-header>
+          <ion-card-title>Compras Recientes</ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="empty-state">
+            <ion-icon name="receiptOutline"></ion-icon>
+            <p>El historial de compras estará disponible próximamente.</p>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    }
+  }
+</ion-content>

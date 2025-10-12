@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- App Information -->
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>PagoPy</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+
+	<!-- Privacy - Camera Usage Description -->
+	<!-- Required for: Product photos, Document scanning, QR code scanning -->
+	<key>NSCameraUsageDescription</key>
+	<string>PagoPy necesita acceso a la cámara para tomar fotos de productos, escanear códigos de barras QR y documentos de clientes.</string>
+
+	<!-- Privacy - Photo Library Usage Description -->
+	<!-- Required for: Saving invoices/receipts as images, Loading product photos -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>PagoPy necesita acceso a la galería de fotos para guardar facturas y recibos, y cargar imágenes de productos.</string>
+
+	<!-- Privacy - Photo Library Additions Usage Description (iOS 11+) -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>PagoPy necesita permiso para guardar facturas y recibos en tu galería de fotos.</string>
+
+	<!-- Privacy - Bluetooth Always Usage Description -->
+	<!-- Required for: Thermal printer connectivity (Bluetooth LE) -->
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>PagoPy usa Bluetooth para conectarse con impresoras térmicas y imprimir facturas y recibos.</string>
+
+	<!-- Privacy - Bluetooth Peripheral Usage Description (iOS 13+) -->
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>PagoPy necesita acceso a Bluetooth para comunicarse con impresoras térmicas.</string>
+
+	<!-- Privacy - Location When In Use Usage Description -->
+	<!-- Required for: Store location tagging, Regional tax settings -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>PagoPy usa tu ubicación para registrar el lugar de la venta y aplicar las configuraciones fiscales regionales correctas.</string>
+
+	<!-- Privacy - Location Always and When In Use Usage Description (Optional) -->
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>PagoPy puede usar tu ubicación para registrar el lugar de ventas incluso cuando la app está en segundo plano.</string>
+
+	<!-- Privacy - Face ID Usage Description (Optional - for biometric authentication) -->
+	<key>NSFaceIDUsageDescription</key>
+	<string>PagoPy usa Face ID para autenticación rápida y segura en la aplicación.</string>
+
+	<!-- Privacy - Contacts Usage Description (Optional - for customer management) -->
+	<key>NSContactsUsageDescription</key>
+	<string>PagoPy puede acceder a tus contactos para importar información de clientes de forma rápida.</string>
+
+	<!-- Privacy - Calendar Usage Description (Optional - for payment reminders) -->
+	<key>NSCalendarsUsageDescription</key>
+	<string>PagoPy puede agregar recordatorios de pago a tu calendario.</string>
+
+	<!-- Privacy - Local Network Usage Description (iOS 14+) -->
+	<!-- Required for: Local API connections during development -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>PagoPy necesita acceso a la red local para conectarse con el servidor durante el desarrollo.</string>
+
+	<!-- Supported Device Orientations -->
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+
+	<!-- Status Bar Style -->
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleDefault</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<true/>
+
+	<!-- Launch Screen -->
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+
+	<!-- File Sharing -->
+	<key>UIFileSharingEnabled</key>
+	<false/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<false/>
+
+	<!-- App Transport Security Settings -->
+	<!-- For development only - remove in production -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<!-- Allow local connections during development -->
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<!-- Allow specific domains (use for staging/production) -->
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+			<!-- Add your backend domain here -->
+			<key>api.pagopy.py</key>
+			<dict>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+				<key>NSExceptionRequiresForwardSecrecy</key>
+				<false/>
+			</dict>
+		</dict>
+	</dict>
+
+	<!-- URL Schemes for Deep Linking -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>py.pago.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>pagopy</string>
+			</array>
+		</dict>
+	</array>
+
+	<!-- Universal Links (Associated Domains) -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:pagopy.py</string>
+		<string>applinks:app.pagopy.py</string>
+	</array>
+
+	<!-- Background Modes -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+		<string>bluetooth-central</string>
+	</array>
+
+	<!-- Scene Configuration (iOS 13+) -->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict/>
+	</dict>
+
+	<!-- Required Device Capabilities -->
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+
+	<!-- App Icon Configuration -->
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconFiles</key>
+			<array>
+				<string>AppIcon</string>
+			</array>
+			<key>UIPrerenderedIcon</key>
+			<false/>
+		</dict>
+	</dict>
+
+	<!-- Keychain Access Groups (for secure storage) -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)py.pago.app</string>
+	</array>
+
+	<!-- Data Protection (encrypt on device) -->
+	<key>NSSupportsLiveActivities</key>
+	<false/>
+
+	<!-- Minimum iOS Version -->
+	<key>MinimumOSVersion</key>
+	<string>13.0</string>
+</dict>
+</plist>

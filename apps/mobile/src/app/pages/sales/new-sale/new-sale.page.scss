@@ -1,77 +1,345 @@
+ion-content {
+  --background: var(--ion-color-light);
+}
+
 ion-card {
   margin-bottom: 16px;
-}
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
-.item-row {
-  margin-bottom: 24px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--ion-color-light);
+  ion-card-header {
+    padding-bottom: 8px;
 
-  &:last-child {
-    border-bottom: none;
+    ion-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+    }
+  }
+
+  ion-card-content {
+    padding: 16px;
   }
 }
 
-.item-details {
+// Badge styling for offline indicator
+ion-badge {
   display: flex;
-  gap: 8px;
   align-items: center;
-  margin-top: 8px;
+  gap: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
 
-  .item-field {
-    flex: 1;
+  ion-icon {
+    font-size: 16px;
+  }
+}
+
+// Form items
+ion-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --background: transparent;
+  margin-bottom: 8px;
+
+  ion-label {
+    font-weight: 500;
   }
 
-  .item-total {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    min-width: 100px;
+  ion-input,
+  ion-select {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+  }
 
-    .total-label {
-      font-size: 12px;
+  &.ion-invalid {
+    --highlight-color-invalid: var(--ion-color-danger);
+  }
+
+  &.ion-valid {
+    --highlight-color-valid: var(--ion-color-success);
+  }
+}
+
+ion-note {
+  padding-left: 12px;
+  font-size: 12px;
+}
+
+// Info box styling
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--ion-color-primary-tint);
+  border-radius: 8px;
+  border-left: 4px solid var(--ion-color-primary);
+
+  .info-icon {
+    font-size: 24px;
+    color: var(--ion-color-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .info-content {
+    flex: 1;
+
+    .info-title {
+      margin: 0 0 8px 0;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--ion-color-primary-shade);
+    }
+
+    .info-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13px;
+      color: var(--ion-color-dark);
+
+      li {
+        margin-bottom: 4px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}
+
+// Items section styling
+.item-container {
+  position: relative;
+  margin-bottom: 20px;
+  padding: 16px;
+  background: var(--ion-color-light-tint);
+  border-radius: 8px;
+  border: 1px solid var(--ion-color-light-shade);
+
+  ion-list {
+    background: transparent;
+    padding: 0;
+  }
+
+  .item-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    .item-field {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-field-small {
+      flex: 0.6;
+      min-width: 80px;
+    }
+  }
+
+  .subtotal-item {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--ion-color-light);
+    border-radius: 6px;
+
+    .subtotal-label {
+      font-weight: 600;
+      font-size: 14px;
       color: var(--ion-color-medium);
     }
 
-    .total-value {
+    .subtotal-value {
+      font-weight: 700;
       font-size: 16px;
-      font-weight: 600;
+      color: var(--ion-color-primary);
+    }
+  }
+
+  .remove-item-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    margin: 0;
+  }
+
+  .item-divider {
+    height: 1px;
+    background: var(--ion-color-light-shade);
+    margin-top: 16px;
+  }
+}
+
+// Add item button
+.add-item-btn {
+  margin-top: 16px;
+  --border-radius: 8px;
+  --border-width: 2px;
+  --border-style: dashed;
+  font-weight: 600;
+}
+
+// Totals section
+.totals-section {
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--ion-color-light);
+  border-radius: 8px;
+
+  .totals-divider {
+    height: 1px;
+    background: var(--ion-color-medium-tint);
+    margin: 12px 0;
+  }
+
+  .totals-breakdown {
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .total-label {
+        font-size: 14px;
+        color: var(--ion-color-medium-shade);
+        font-weight: 500;
+      }
+
+      .total-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+      }
+    }
+  }
+
+  .total-final {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0 4px 0;
+
+    .total-final-label {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--ion-color-dark);
+    }
+
+    .total-final-value {
+      font-size: 24px;
+      font-weight: 700;
       color: var(--ion-color-primary);
     }
   }
 }
 
-.remove-btn {
-  margin-top: 8px;
-}
+// Submit section
+.submit-section {
+  margin-top: 24px;
+  margin-bottom: 24px;
 
-.total-card {
-  background: var(--ion-color-primary);
-  color: white;
+  ion-button {
+    --border-radius: 12px;
+    font-weight: 600;
+    font-size: 16px;
+    height: 56px;
 
-  .total-section {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .total-label {
-      font-size: 18px;
-      font-weight: 600;
+    ion-spinner {
+      margin: 0;
     }
 
-    .total-amount {
-      font-size: 28px;
-      font-weight: bold;
+    &[disabled] {
+      opacity: 0.5;
     }
   }
 }
 
-.action-buttons {
-  margin: 24px 0;
+// Responsive adjustments
+@media (max-width: 576px) {
+  ion-card-content {
+    padding: 12px;
+  }
 
-  ion-button {
-    height: 56px;
-    font-size: 18px;
-    font-weight: 600;
+  .item-container {
+    padding: 12px;
+
+    .item-row {
+      flex-direction: column;
+
+      .item-field,
+      .item-field-small {
+        flex: 1;
+        width: 100%;
+      }
+    }
+  }
+
+  .totals-section {
+    .total-final {
+      .total-final-label {
+        font-size: 16px;
+      }
+
+      .total-final-value {
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+// Loading state overlay
+ion-spinner {
+  display: block;
+  margin: auto;
+}
+
+// Validation states
+.ion-invalid.ion-touched {
+  ion-input,
+  ion-select {
+    --highlight-background: var(--ion-color-danger-tint);
+  }
+}
+
+.ion-valid.ion-touched {
+  ion-input,
+  ion-select {
+    --highlight-background: var(--ion-color-success-tint);
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  ion-card {
+    background: var(--ion-color-step-100);
+  }
+
+  .item-container {
+    background: var(--ion-color-step-150);
+    border-color: var(--ion-color-step-200);
+
+    .subtotal-item {
+      background: var(--ion-color-step-100);
+    }
+  }
+
+  .totals-section {
+    background: var(--ion-color-step-100);
+  }
+
+  .info-box {
+    background: var(--ion-color-primary-shade);
   }
 }

@@ -1,9 +1,9 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { User, LoginResponse } from '../models/user.model';
+import { User, AuthResponse, LoginDto, CreateUserDto } from '@pago-py/shared-models';
 
 @Injectable({
   providedIn: 'root'
@@ -12,75 +12,137 @@ export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
 
+  // Private signals for tokens and user
+  private accessTokenSignal = signal<string | null>(null);
+  private refreshTokenSignal = signal<string | null>(null);
   private currentUserSignal = signal<User | null>(null);
-  private tokenKey = 'auth_token';
 
+  // Public readonly signals
   currentUser = this.currentUserSignal.asReadonly();
+
+  // Computed signal for authentication status
+  isAuthenticated = computed(() => !!this.currentUserSignal() && !!this.accessTokenSignal());
 
   constructor() {
     this.loadUserFromStorage();
   }
 
   private loadUserFromStorage(): void {
-    const token = this.getToken();
-    if (token) {
-      // TODO: Validate token and load user from API
-      // For now, we'll just check if token exists
+    const accessToken = this.getAccessToken();
+    if (accessToken) {
+      this.accessTokenSignal.set(accessToken);
+      // Load user data from API
+      this.getCurrentUser().subscribe({
+        error: () => {
+          // If token is invalid, clear everything
+          this.clearAuth();
+        }
+      });
     }
   }
 
-  login(email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/login`, {
-      email,
-      password
-    }).pipe(
+  /**
+   * Login user with email and password
+   */
+  login(email: string, password: string): Observable<AuthResponse> {
+    const loginData: LoginDto = { email, password };
+
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, loginData).pipe(
       tap(response => {
-        this.setToken(response.token);
+        this.setTokens(response.accessToken, response.refreshToken);
         this.currentUserSignal.set(response.user);
       }),
       catchError(error => {
         console.error('Login error:', error);
-        return throwError(() => new Error('Credenciales inválidas'));
+        const errorMessage = error.error?.message || 'Credenciales inválidas';
+        return throwError(() => new Error(errorMessage));
       })
     );
   }
 
-  register(name: string, email: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/register`, {
-      name,
-      email,
-      password
-    }).pipe(
+  /**
+   * Register new user with complete data
+   */
+  register(userData: CreateUserDto): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/register`, userData).pipe(
       tap(response => {
-        this.setToken(response.token);
+        // Auto-login after successful registration
+        this.setTokens(response.accessToken, response.refreshToken);
         this.currentUserSignal.set(response.user);
       }),
       catchError(error => {
         console.error('Registration error:', error);
-        return throwError(() => new Error('Error al registrar usuario'));
+        const errorMessage = error.error?.message || 'Error al registrar usuario';
+        return throwError(() => new Error(errorMessage));
       })
     );
   }
 
+  /**
+   * Logout user and clear all auth data
+   */
   logout(): void {
-    localStorage.removeItem(this.tokenKey);
-    this.currentUserSignal.set(null);
+    this.clearAuth();
     this.router.navigate(['/auth/login']);
   }
 
-  isAuthenticated(): boolean {
-    return !!this.getToken();
+  /**
+   * Get current user from API
+   */
+  getCurrentUser(): Observable<User> {
+    return this.http.get<User>(`${environment.apiUrl}/auth/me`).pipe(
+      tap(user => {
+        this.currentUserSignal.set(user);
+      }),
+      catchError(error => {
+        console.error('Get current user error:', error);
+        return throwError(() => error);
+      })
+    );
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.tokenKey);
+  /**
+   * Get access token (used by interceptor)
+   */
+  getAccessToken(): string | null {
+    if (this.accessTokenSignal()) {
+      return this.accessTokenSignal();
+    }
+    // Fallback to localStorage for page refresh
+    return localStorage.getItem('access_token');
   }
 
-  private setToken(token: string): void {
-    localStorage.setItem(this.tokenKey, token);
+  /**
+   * Get refresh token
+   */
+  getRefreshToken(): string | null {
+    if (this.refreshTokenSignal()) {
+      return this.refreshTokenSignal();
+    }
+    return localStorage.getItem('refresh_token');
   }
 
-  getCurrentUser(): User | null {
-    return this.currentUserSignal();
+  /**
+   * Set authentication tokens
+   */
+  private setTokens(accessToken: string, refreshToken?: string): void {
+    this.accessTokenSignal.set(accessToken);
+    localStorage.setItem('access_token', accessToken);
+
+    if (refreshToken) {
+      this.refreshTokenSignal.set(refreshToken);
+      localStorage.setItem('refresh_token', refreshToken);
+    }
+  }
+
+  /**
+   * Clear all authentication data
+   */
+  private clearAuth(): void {
+    this.accessTokenSignal.set(null);
+    this.refreshTokenSignal.set(null);
+    this.currentUserSignal.set(null);
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
   }
 }

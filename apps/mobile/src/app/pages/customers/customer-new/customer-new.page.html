@@ -1,0 +1,31 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/customers"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      Nuevo Cliente
+      @if (!isOnline()) {
+        <ion-badge color="warning" class="offline-badge">
+          <ion-icon name="cloudOfflineOutline"></ion-icon>
+          Modo sin conexión
+        </ion-badge>
+      }
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (!isOnline()) {
+    <div class="offline-banner">
+      <ion-icon name="cloudOfflineOutline"></ion-icon>
+      <p>Está trabajando sin conexión. El cliente se guardará localmente y se sincronizará automáticamente cuando vuelva a estar en línea.</p>
+    </div>
+  }
+
+  <app-customer-form
+    submitLabel="Crear Cliente"
+    (formSubmit)="onFormSubmit($event)"
+    (formCancel)="onFormCancel()"
+  ></app-customer-form>
+</ion-content>

@@ -68,16 +68,27 @@ model User {
   password  String
   firstName String
   lastName  String
+
+  // Fiscal data (Paraguayan business requirements)
+  ruc            String   @unique
+  razonSocial    String
+  direccion      String?
+  telefono       String?
+  timbrado       String
+  timbradoVence  DateTime
+
   role      UserRole @default(SELLER)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  sales Sale[]
+  sales    Sale[]
+  products Product[]
 
   @@index([email])
   @@index([role])
+  @@index([ruc])
   @@map("users")
 }
 
@@ -117,10 +128,15 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // Foreign keys
+  userId String
+
   // Relations
+  user      User       @relation(fields: [userId], references: [id])
   saleItems SaleItem[]
 
   @@index([code])
+  @@index([userId])
   @@index([isActive])
   @@map("products")
 }
@@ -218,6 +234,8 @@ model Invoice {
   setResponse      Json? // Response from SET e-Kuatia
   setApprovedAt    DateTime?
   sentToCustomerAt DateTime?
+  pdfGenerated     Boolean       @default(false) // Flag indicating if PDF was generated
+  pdfUrl           String? // URL/path to generated PDF file
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 

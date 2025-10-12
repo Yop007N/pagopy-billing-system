@@ -1,18 +1,11 @@
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'user';
-  createdAt: Date;
-}
-
-export interface LoginResponse {
-  token: string;
-  user: User;
-}
-
-export interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-}
+/**
+ * Re-export types from shared-models library
+ * This provides a single source of truth for user-related types
+ */
+export {
+  User,
+  CreateUserDto,
+  UpdateUserDto,
+  LoginDto,
+  AuthResponse
+} from '@pago-py/shared-models';

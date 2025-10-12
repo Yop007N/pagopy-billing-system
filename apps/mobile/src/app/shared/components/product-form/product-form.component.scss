@@ -1,0 +1,199 @@
+ion-content {
+  --background: var(--ion-background-color, #f5f5f5);
+}
+
+.form-list {
+  background: transparent;
+  padding: 1rem 0;
+
+  ion-item {
+    --background: var(--ion-card-background, #ffffff);
+    --border-color: var(--ion-border-color, #e0e0e0);
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    --padding-start: 1rem;
+    --inner-padding-end: 1rem;
+
+    &.ion-invalid {
+      --border-color: var(--ion-color-danger);
+      --highlight-color-focused: var(--ion-color-danger);
+    }
+
+    ion-label {
+      margin-bottom: 0.5rem;
+
+      h3 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--ion-text-color);
+      }
+
+      p {
+        font-size: 0.8rem;
+        color: var(--ion-color-medium);
+        margin-top: 0.25rem;
+      }
+
+      .required {
+        color: var(--ion-color-danger);
+        font-weight: 700;
+      }
+    }
+
+    ion-input,
+    ion-textarea,
+    ion-select {
+      --padding-top: 0.5rem;
+      --padding-bottom: 0.5rem;
+    }
+
+    ion-note {
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+
+      &[slot="helper"] {
+        color: var(--ion-color-medium);
+      }
+
+      &[slot="error"] {
+        color: var(--ion-color-danger);
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.profit-item {
+  background: var(--ion-color-light-tint);
+  border-left: 4px solid var(--ion-color-success);
+
+  ion-label {
+    h3 {
+      font-size: 0.875rem;
+      color: var(--ion-color-medium);
+      margin-bottom: 0.25rem;
+    }
+
+    .profit-value {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--ion-color-success);
+      margin: 0;
+
+      .margin-badge {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--ion-color-medium);
+        margin-left: 0.5rem;
+      }
+    }
+  }
+}
+
+.validation-summary {
+  background: var(--ion-color-danger-tint);
+  border-radius: 8px;
+  margin-top: 1rem;
+
+  ion-note {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    ion-icon {
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem 1rem;
+  background: var(--ion-background-color);
+  border-top: 1px solid var(--ion-border-color);
+
+  ion-button {
+    margin: 0;
+    --border-radius: 8px;
+
+    ion-spinner {
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  ion-content {
+    --background: var(--ion-background-color, #1e1e1e);
+  }
+
+  .form-list {
+    ion-item {
+      --background: var(--ion-card-background, #2d2d2d);
+      --border-color: var(--ion-border-color, #3d3d3d);
+    }
+  }
+
+  .profit-item {
+    background: var(--ion-color-dark-shade);
+  }
+
+  .validation-summary {
+    background: rgba(var(--ion-color-danger-rgb), 0.2);
+  }
+
+  .action-buttons {
+    background: var(--ion-background-color);
+    border-top-color: var(--ion-border-color);
+  }
+}
+
+// Responsive adjustments
+@media (min-width: 768px) {
+  .form-list {
+    padding: 1.5rem;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .action-buttons {
+    flex-direction: row;
+    justify-content: flex-end;
+    max-width: 700px;
+    margin: 0 auto;
+
+    ion-button {
+      min-width: 150px;
+
+      &[fill="outline"] {
+        flex: 0;
+      }
+
+      &:not([fill="outline"]) {
+        flex: 1;
+        max-width: 250px;
+      }
+    }
+  }
+}
+
+// Animations
+ion-item {
+  animation: fadeInUp 0.2s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

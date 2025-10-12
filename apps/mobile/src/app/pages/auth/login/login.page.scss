@@ -26,33 +26,127 @@
 
 ion-card {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
 }
 
 ion-item {
   --padding-start: 16px;
   --padding-end: 16px;
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   border-radius: 8px;
+
+  &.ion-invalid.ion-touched {
+    --border-color: var(--ion-color-danger);
+    --highlight-color-focused: var(--ion-color-danger);
+  }
+}
+
+.field-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  margin: 4px 0 12px 16px;
+
+  ion-icon {
+    font-size: 14px;
+  }
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0;
+  gap: 8px;
+
+  .remember-me-item {
+    flex: 0 1 auto;
+    --padding-start: 0;
+    --padding-end: 0;
+    --inner-padding-end: 0;
+    margin: 0;
+
+    ion-label {
+      font-size: 14px;
+      margin-left: 8px;
+    }
+  }
+
+  .forgot-password-btn {
+    flex: 0 1 auto;
+    font-size: 13px;
+    text-transform: none;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    margin: 0;
+  }
+}
+
+.password-toggle {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  margin: 0;
+  height: 40px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: rgba(var(--ion-color-danger-rgb), 0.1);
+  font-size: 14px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  p {
+    margin: 0;
+  }
 }
 
 .login-button {
   margin-top: 24px;
   height: 48px;
   font-weight: 600;
+  font-size: 16px;
 }
 
-.error-message {
-  margin: 16px 0 0 0;
-  font-size: 14px;
-  text-align: center;
+.biometric-button {
+  margin-top: 12px;
+  height: 48px;
+  font-weight: 500;
 }
 
 .register-link {
   text-align: center;
   margin-top: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 
   ion-button {
     text-transform: none;
     font-weight: 600;
+  }
+}
+
+.info-footer {
+  text-align: center;
+  margin-top: 24px;
+  padding: 0 16px;
+
+  p {
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 0;
   }
 }

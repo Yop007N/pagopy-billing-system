@@ -1,0 +1,244 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/products"></ion-back-button>
+    </ion-buttons>
+    <ion-title>{{ product()?.name || 'Producto' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openProductForm()" *ngIf="product()">
+        <ion-icon slot="icon-only" name="pencil-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="showDeleteConfirm()" color="danger" *ngIf="product()">
+        <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando producto...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="error-container">
+    <ion-icon name="alert-circle-outline" color="danger"></ion-icon>
+    <p>{{ error() }}</p>
+    <ion-button (click)="loadProduct(product()?.id || '')" fill="outline" color="primary">
+      Reintentar
+    </ion-button>
+  </div>
+
+  <!-- Product Details -->
+  <div *ngIf="product() && !loading() && !error()" class="product-container">
+    <!-- Product Image Card -->
+    <ion-card class="image-card" *ngIf="productImage() || uploadingImage()">
+      <ion-card-content>
+        <div class="image-container" (click)="viewImageFullScreen()">
+          <ion-img
+            *ngIf="productImage() && !uploadingImage()"
+            [src]="productImage()!"
+            [alt]="product()!.name"
+            class="product-image">
+          </ion-img>
+          <div *ngIf="uploadingImage()" class="image-loading">
+            <ion-spinner name="crescent"></ion-spinner>
+            <p>Subiendo imagen...</p>
+          </div>
+        </div>
+        <div class="image-actions" *ngIf="!uploadingImage()">
+          <ion-button fill="clear" size="small" (click)="showImageOptions(); $event.stopPropagation()">
+            <ion-icon slot="start" name="camera-outline"></ion-icon>
+            Cambiar Imagen
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Add Image Card (if no image) -->
+    <ion-card class="add-image-card" *ngIf="!productImage() && !uploadingImage()" (click)="showImageOptions()">
+      <ion-card-content>
+        <div class="add-image-placeholder">
+          <ion-icon name="camera-outline"></ion-icon>
+          <p>Agregar Imagen del Producto</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Status Card -->
+    <ion-card class="status-card">
+      <ion-card-content>
+        <div class="status-badges">
+          <ion-badge [color]="getStatusColor(product()!.isActive)">
+            <ion-icon [name]="product()!.isActive ? 'checkmark-circle' : 'close-circle'"></ion-icon>
+            {{ product()!.isActive ? 'Activo' : 'Inactivo' }}
+          </ion-badge>
+          <ion-badge [color]="getStockColor(product()!.stock)">
+            <ion-icon name="cube-outline"></ion-icon>
+            Stock: {{ product()!.stock }}
+          </ion-badge>
+          <ion-badge [color]="getTaxBadgeColor(product()!.taxRate)">
+            IVA {{ product()!.taxRate }}%
+          </ion-badge>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Main Info Card -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Información General</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="full">
+          <ion-item>
+            <ion-icon name="barcode-outline" slot="start" color="primary"></ion-icon>
+            <ion-label>
+              <h3>Código</h3>
+              <p>{{ product()!.code }}</p>
+            </ion-label>
+            <ion-button slot="end" fill="clear" (click)="scanBarcode()">
+              <ion-icon slot="icon-only" name="scan-outline"></ion-icon>
+            </ion-button>
+          </ion-item>
+
+          <ion-item>
+            <ion-icon name="pricetag-outline" slot="start" color="success"></ion-icon>
+            <ion-label>
+              <h3>Precio de Venta</h3>
+              <p class="price-value">{{ formatPrice(product()!.price) }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="product()!.cost">
+            <ion-icon name="cash-outline" slot="start" color="warning"></ion-icon>
+            <ion-label>
+              <h3>Costo</h3>
+              <p class="price-value">{{ formatPrice(product()!.cost!) }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="product()!.cost">
+            <ion-icon name="trending-up-outline" slot="start" color="tertiary"></ion-icon>
+            <ion-label>
+              <h3>Ganancia</h3>
+              <p class="profit-value">
+                {{ formatPrice(calculateProfit()) }}
+                <span class="margin">({{ calculateMargin().toFixed(1) }}%)</span>
+              </p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="product()!.description">
+            <ion-icon name="document-text-outline" slot="start" color="medium"></ion-icon>
+            <ion-label>
+              <h3>Descripción</h3>
+              <p class="description-text">{{ product()!.description }}</p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Stock Management Card -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Gestión de Stock</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="stock-info">
+          <div class="stock-display">
+            <ion-icon name="cube-outline" [color]="getStockColor(product()!.stock)"></ion-icon>
+            <div class="stock-number">{{ product()!.stock }}</div>
+            <div class="stock-label">unidades disponibles</div>
+          </div>
+          <ion-button expand="block" (click)="adjustStock()" color="primary">
+            Ajustar Stock
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Metadata Card -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Información del Sistema</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="full">
+          <ion-item>
+            <ion-label>
+              <h3>Fecha de Creación</h3>
+              <p>{{ formatDate(product()!.createdAt) }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <h3>Última Actualización</h3>
+              <p>{{ formatDate(product()!.updatedAt) }}</p>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="product()!.synced !== undefined">
+            <ion-label>
+              <h3>Estado de Sincronización</h3>
+              <p>
+                <ion-badge [color]="product()!.synced ? 'success' : 'warning'">
+                  {{ product()!.synced ? 'Sincronizado' : 'Pendiente' }}
+                </ion-badge>
+              </p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Actions Card -->
+    <ion-card>
+      <ion-card-content>
+        <ion-button
+          expand="block"
+          [color]="product()!.isActive ? 'medium' : 'success'"
+          (click)="toggleActive()">
+          <ion-icon
+            slot="start"
+            [name]="product()!.isActive ? 'close-circle' : 'checkmark-circle'">
+          </ion-icon>
+          {{ product()!.isActive ? 'Desactivar Producto' : 'Activar Producto' }}
+        </ion-button>
+
+        <ion-button expand="block" color="danger" fill="outline" (click)="showDeleteConfirm()">
+          <ion-icon slot="start" name="trash-outline"></ion-icon>
+          Eliminar Producto
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Floating Action Button -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end" *ngIf="product()">
+    <ion-fab-button color="primary">
+      <ion-icon name="ellipsis-vertical"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      <ion-fab-button color="tertiary" (click)="openProductForm()">
+        <ion-icon name="pencil-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button color="medium" (click)="showImageOptions()">
+        <ion-icon name="camera-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button color="secondary" (click)="scanBarcode()">
+        <ion-icon name="scan-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button color="success" (click)="adjustStock()">
+        <ion-icon name="cube-outline"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button color="warning" (click)="toggleActive()">
+        <ion-icon [name]="product()!.isActive ? 'close-circle' : 'checkmark-circle'"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
+</ion-content>

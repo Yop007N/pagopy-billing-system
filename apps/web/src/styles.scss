@@ -1,29 +1,317 @@
 /* You can add global styles to this file, and also import other style files */
 
+/* Angular Material Theme */
+@use '@angular/material' as mat;
+
 /* Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Angular Material Theme */
-@use '@angular/material' as mat;
-
 @include mat.core();
 
-/* Define custom theme */
-$pagopy-primary: mat.define-palette(mat.$indigo-palette);
-$pagopy-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
-$pagopy-warn: mat.define-palette(mat.$red-palette);
+/* ============================================
+   PAGOPY PARAGUAY-THEMED COLOR SYSTEM
+   Based on Paraguay National Colors
+   Blue (#0033A0) and Yellow (#FFCD00)
+   ============================================ */
 
+/* Define Paraguay Blue Palette (Primary) */
+$pagopy-blue-palette: (
+  50: #e6ecf5,
+  100: #c0d0e6,
+  200: #96b0d5,
+  300: #6c90c4,
+  400: #4d78b8,
+  500: #2e60ab,  // Professional darkened blue
+  600: #0045a4,  // Close to flag blue
+  700: #003a96,
+  800: #003088,
+  900: #001e6d,  // Deep navy
+  A100: #80a3ff,
+  A200: #4d7fff,
+  A400: #1a5bff,
+  A700: #0050ff,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: white,
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: white,
+    A400: white,
+    A700: white,
+  )
+);
+
+/* Define Paraguay Gold Palette (Accent) */
+$pagopy-gold-palette: (
+  50: #fffbee,
+  100: #fff5d4,
+  200: #ffefb8,
+  300: #ffe89b,
+  400: #ffe385,
+  500: #ffde70,  // Professional gold (darkened from flag yellow)
+  600: #ffc107,  // Rich gold
+  700: #f9a825,  // Deep gold
+  800: #f57f17,  // Amber gold
+  900: #ff6f00,  // Deep amber
+  A100: #ffff8d,
+  A200: #ffff00,
+  A400: #ffea00,
+  A700: #ffd600,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: rgba(black, 0.87),
+    600: rgba(black, 0.87),
+    700: rgba(black, 0.87),
+    800: rgba(black, 0.87),
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: rgba(black, 0.87),
+  )
+);
+
+/* Define Success Palette (Green) */
+$pagopy-success-palette: (
+  50: #e8f5e9,
+  100: #c8e6c9,
+  200: #a5d6a7,
+  300: #81c784,
+  400: #66bb6a,
+  500: #4caf50,
+  600: #43a047,
+  700: #388e3c,
+  800: #2e7d32,
+  900: #1b5e20,
+  A100: #b9f6ca,
+  A200: #69f0ae,
+  A400: #00e676,
+  A700: #00c853,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: rgba(black, 0.87),
+  )
+);
+
+/* Define Error Palette (Red) */
+$pagopy-error-palette: (
+  50: #ffebee,
+  100: #ffcdd2,
+  200: #ef9a9a,
+  300: #e57373,
+  400: #ef5350,
+  500: #f44336,
+  600: #e53935,
+  700: #d32f2f,
+  800: #c62828,
+  900: #b71c1c,
+  A100: #ff8a80,
+  A200: #ff5252,
+  A400: #ff1744,
+  A700: #d50000,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: white,
+    A400: white,
+    A700: white,
+  )
+);
+
+/* Apply Palettes to Theme */
+$pagopy-primary: mat.define-palette($pagopy-blue-palette, 600, 400, 800);
+$pagopy-accent: mat.define-palette($pagopy-gold-palette, 600, 400, 800);
+$pagopy-warn: mat.define-palette($pagopy-error-palette, 600, 400, 800);
+
+/* Light Theme */
 $pagopy-theme: mat.define-light-theme((
   color: (
     primary: $pagopy-primary,
     accent: $pagopy-accent,
     warn: $pagopy-warn,
-  )
+  ),
+  typography: mat.define-typography-config(),
+  density: 0,
 ));
 
 @include mat.all-component-themes($pagopy-theme);
+
+/* Dark Theme */
+.dark-theme {
+  $pagopy-dark-theme: mat.define-dark-theme((
+    color: (
+      primary: $pagopy-primary,
+      accent: $pagopy-accent,
+      warn: $pagopy-warn,
+    )
+  ));
+
+  @include mat.all-component-colors($pagopy-dark-theme);
+}
+
+/* ============================================
+   CSS CUSTOM PROPERTIES (CSS VARIABLES)
+   For consistent color management across components
+   ============================================ */
+
+:root {
+  /* Paraguay Primary Blue */
+  --color-primary-50: #e6ecf5;
+  --color-primary-100: #c0d0e6;
+  --color-primary-200: #96b0d5;
+  --color-primary-300: #6c90c4;
+  --color-primary-400: #4d78b8;
+  --color-primary-500: #2e60ab;
+  --color-primary-600: #0045a4;
+  --color-primary-700: #003a96;
+  --color-primary-800: #003088;
+  --color-primary-900: #001e6d;
+  --color-primary: var(--color-primary-600);
+
+  /* Paraguay Gold/Yellow */
+  --color-accent-50: #fffbee;
+  --color-accent-100: #fff5d4;
+  --color-accent-200: #ffefb8;
+  --color-accent-300: #ffe89b;
+  --color-accent-400: #ffe385;
+  --color-accent-500: #ffde70;
+  --color-accent-600: #ffc107;
+  --color-accent-700: #f9a825;
+  --color-accent-800: #f57f17;
+  --color-accent-900: #ff6f00;
+  --color-accent: var(--color-accent-600);
+
+  /* Success */
+  --color-success-50: #e8f5e9;
+  --color-success-100: #c8e6c9;
+  --color-success-500: #4caf50;
+  --color-success-600: #43a047;
+  --color-success-700: #388e3c;
+  --color-success: var(--color-success-600);
+
+  /* Warning */
+  --color-warning-50: #fff8e1;
+  --color-warning-100: #ffecb3;
+  --color-warning-500: #ffc107;
+  --color-warning-600: #ffb300;
+  --color-warning-700: #ffa000;
+  --color-warning: var(--color-warning-700);
+
+  /* Error */
+  --color-error-50: #ffebee;
+  --color-error-100: #ffcdd2;
+  --color-error-500: #f44336;
+  --color-error-600: #e53935;
+  --color-error-700: #d32f2f;
+  --color-error: var(--color-error-600);
+
+  /* Info */
+  --color-info-50: #e0f2f1;
+  --color-info-100: #b2dfdb;
+  --color-info-500: #009688;
+  --color-info-600: #00897b;
+  --color-info-700: #00796b;
+  --color-info: var(--color-info-600);
+
+  /* Neutral Grays */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #eeeeee;
+  --color-gray-300: #e0e0e0;
+  --color-gray-400: #bdbdbd;
+  --color-gray-500: #9e9e9e;
+  --color-gray-600: #757575;
+  --color-gray-700: #616161;
+  --color-gray-800: #424242;
+  --color-gray-900: #212121;
+
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: var(--color-gray-50);
+  --bg-tertiary: var(--color-gray-100);
+
+  /* Text Colors */
+  --text-primary: rgba(0, 0, 0, 0.87);
+  --text-secondary: rgba(0, 0, 0, 0.60);
+  --text-disabled: rgba(0, 0, 0, 0.38);
+  --text-hint: rgba(0, 0, 0, 0.38);
+
+  /* Border Colors */
+  --border-light: var(--color-gray-200);
+  --border-medium: var(--color-gray-300);
+  --border-dark: var(--color-gray-400);
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 51, 160, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 51, 160, 0.1), 0 2px 4px -1px rgba(0, 51, 160, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 51, 160, 0.1), 0 4px 6px -2px rgba(0, 51, 160, 0.05);
+}
+
+/* Dark Theme Variables */
+.dark-theme {
+  /* Background Colors */
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2a2a2a;
+
+  /* Text Colors */
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.60);
+  --text-disabled: rgba(255, 255, 255, 0.38);
+  --text-hint: rgba(255, 255, 255, 0.38);
+
+  /* Border Colors */
+  --border-light: rgba(255, 255, 255, 0.12);
+  --border-medium: rgba(255, 255, 255, 0.2);
+  --border-dark: rgba(255, 255, 255, 0.3);
+
+  /* Adjust scrollbar for dark theme */
+  ::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-gray-600);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gray-500);
+  }
+}
 
 /* Global Styles */
 * {
@@ -39,6 +327,9 @@ html, body {
 body {
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Custom Utility Classes */
@@ -52,6 +343,70 @@ body {
   width: 100%;
 }
 
+/* Semantic Color Utility Classes */
+.text-primary {
+  color: var(--color-primary) !important;
+}
+
+.text-accent {
+  color: var(--color-accent) !important;
+}
+
+.text-success {
+  color: var(--color-success) !important;
+}
+
+.text-warning {
+  color: var(--color-warning) !important;
+}
+
+.text-error {
+  color: var(--color-error) !important;
+}
+
+.text-info {
+  color: var(--color-info) !important;
+}
+
+.bg-primary {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+}
+
+.bg-accent {
+  background-color: var(--color-accent) !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.bg-success {
+  background-color: var(--color-success) !important;
+  color: white !important;
+}
+
+.bg-warning {
+  background-color: var(--color-warning) !important;
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.bg-error {
+  background-color: var(--color-error) !important;
+  color: white !important;
+}
+
+.bg-info {
+  background-color: var(--color-info) !important;
+  color: white !important;
+}
+
+/* Border Utilities */
+.border-primary {
+  border-color: var(--color-primary) !important;
+}
+
+.border-accent {
+  border-color: var(--color-accent) !important;
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -59,16 +414,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--color-gray-100);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #888;
+  background: var(--color-gray-400);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--color-gray-600);
 }
 
 /* Loading State */
@@ -79,9 +434,417 @@ body {
   height: 100vh;
 }
 
+/* ============================================
+   CSS TRANSITION & ANIMATION UTILITIES
+   ============================================ */
+
+/* Animation Duration Variables */
+:root {
+  --animation-duration-fast: 200ms;
+  --animation-duration-normal: 300ms;
+  --animation-duration-slow: 400ms;
+  --animation-duration-slower: 600ms;
+
+  /* Easing Functions */
+  --animation-easing-standard: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --animation-easing-ease-in: cubic-bezier(0.4, 0.0, 1, 1);
+  --animation-easing-ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --animation-easing-ease-in-out: cubic-bezier(0.4, 0.0, 0.2, 1);
+  --animation-easing-sharp: cubic-bezier(0.4, 0.0, 0.6, 1);
+}
+
+/* Accessibility: Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Transition Utilities */
+.transition-none {
+  transition: none !important;
+}
+
+.transition-all {
+  transition: all var(--animation-duration-normal) var(--animation-easing-standard);
+}
+
+.transition-fast {
+  transition-duration: var(--animation-duration-fast) !important;
+}
+
+.transition-normal {
+  transition-duration: var(--animation-duration-normal) !important;
+}
+
+.transition-slow {
+  transition-duration: var(--animation-duration-slow) !important;
+}
+
+.transition-colors {
+  transition-property: color, background-color, border-color;
+  transition-duration: var(--animation-duration-normal);
+  transition-timing-function: var(--animation-easing-standard);
+}
+
+.transition-opacity {
+  transition-property: opacity;
+  transition-duration: var(--animation-duration-normal);
+  transition-timing-function: var(--animation-easing-standard);
+}
+
+.transition-transform {
+  transition-property: transform;
+  transition-duration: var(--animation-duration-normal);
+  transition-timing-function: var(--animation-easing-standard);
+}
+
+.transition-shadow {
+  transition-property: box-shadow;
+  transition-duration: var(--animation-duration-normal);
+  transition-timing-function: var(--animation-easing-standard);
+}
+
+/* Hover Effects */
+.hover-lift {
+  transition: transform var(--animation-duration-normal) var(--animation-easing-standard),
+              box-shadow var(--animation-duration-normal) var(--animation-easing-standard);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.hover-scale {
+  transition: transform var(--animation-duration-normal) var(--animation-easing-standard);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-brightness {
+  transition: filter var(--animation-duration-normal) var(--animation-easing-standard);
+}
+
+.hover-brightness:hover {
+  filter: brightness(1.1);
+}
+
+.hover-opacity {
+  transition: opacity var(--animation-duration-normal) var(--animation-easing-standard);
+}
+
+.hover-opacity:hover {
+  opacity: 0.8;
+}
+
+/* Button Micro-interactions */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+  transition: all var(--animation-duration-fast) var(--animation-easing-standard);
+}
+
+.btn-ripple:active {
+  transform: scale(0.98);
+}
+
+/* Card Interactions */
+.card-interactive {
+  transition: transform var(--animation-duration-normal) var(--animation-easing-standard),
+              box-shadow var(--animation-duration-normal) var(--animation-easing-standard),
+              border-color var(--animation-duration-normal) var(--animation-easing-standard);
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.card-interactive:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Form Input Interactions */
+.input-focus-effect {
+  transition: border-color var(--animation-duration-fast) var(--animation-easing-standard),
+              box-shadow var(--animation-duration-fast) var(--animation-easing-standard);
+}
+
+/* Loading Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-25%);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+/* Fade Utilities */
+.fade-enter {
+  animation: fadeIn var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+.fade-exit {
+  animation: fadeOut var(--animation-duration-fast) var(--animation-easing-ease-in);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Slide Utilities */
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-in-left {
+  animation: slideInLeft var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+.slide-in-right {
+  animation: slideInRight var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+.slide-in-up {
+  animation: slideInUp var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+.slide-in-down {
+  animation: slideInDown var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+/* Scale Utilities */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.scale-in {
+  animation: scaleIn var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+/* List Item Stagger (use with JavaScript) */
+.stagger-item {
+  opacity: 0;
+  animation: fadeIn var(--animation-duration-normal) var(--animation-easing-ease-out) forwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 50ms; }
+.stagger-item:nth-child(3) { animation-delay: 100ms; }
+.stagger-item:nth-child(4) { animation-delay: 150ms; }
+.stagger-item:nth-child(5) { animation-delay: 200ms; }
+.stagger-item:nth-child(6) { animation-delay: 250ms; }
+.stagger-item:nth-child(7) { animation-delay: 300ms; }
+.stagger-item:nth-child(8) { animation-delay: 350ms; }
+.stagger-item:nth-child(9) { animation-delay: 400ms; }
+.stagger-item:nth-child(10) { animation-delay: 450ms; }
+
+/* Focus Ring Animation */
+.focus-ring {
+  outline: none;
+  position: relative;
+}
+
+.focus-ring:focus-visible::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid #0045a4;
+  border-radius: inherit;
+  animation: focusRing var(--animation-duration-normal) var(--animation-easing-ease-out);
+}
+
+@keyframes focusRing {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Success/Error Feedback Animations */
+@keyframes successPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 0 10px rgba(76, 175, 80, 0);
+  }
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.success-pulse {
+  animation: successPulse 0.6s ease-out;
+}
+
+.error-shake {
+  animation: errorShake 0.6s ease-in-out;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* Print Styles */
 @media print {
   .no-print {
     display: none !important;
+  }
+
+  /* Disable animations in print */
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
   }
 }

@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -8,7 +8,44 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthService } from '../../../core/services/auth.service';
+import { CreateUserDto } from '@pago-py/shared-models';
+
+/**
+ * Custom validator to ensure passwords match
+ */
+function passwordMatchValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const password = control.get('password');
+    const confirmPassword = control.get('confirmPassword');
+
+    if (!password || !confirmPassword) {
+      return null;
+    }
+
+    return password.value === confirmPassword.value ? null : { passwordMismatch: true };
+  };
+}
+
+/**
+ * Custom validator to ensure date is in the future
+ */
+function futureDateValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    if (!control.value) {
+      return null;
+    }
+
+    const selectedDate = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return selectedDate > today ? null : { futureDate: true };
+  };
+}
 
 @Component({
   selector: 'app-register',
@@ -22,118 +59,89 @@ import { AuthService } from '../../../core/services/auth.service';
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSnackBarModule
   ],
-  template: `
-    <div class="register-container flex items-center justify-center min-h-[80vh]">
-      <mat-card class="register-card max-w-md w-full">
-        <mat-card-header>
-          <mat-card-title class="text-2xl font-bold text-center w-full">
-            Registro
-          </mat-card-title>
-        </mat-card-header>
-
-        <mat-card-content class="mt-4">
-          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-            <mat-form-field appearance="outline" class="w-full mb-4">
-              <mat-label>Nombre completo</mat-label>
-              <input matInput type="text" formControlName="name">
-              <mat-icon matPrefix>person</mat-icon>
-              @if (registerForm.get('name')?.hasError('required') && registerForm.get('name')?.touched) {
-                <mat-error>El nombre es requerido</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="w-full mb-4">
-              <mat-label>Correo electrónico</mat-label>
-              <input matInput type="email" formControlName="email" placeholder="correo@ejemplo.com">
-              <mat-icon matPrefix>email</mat-icon>
-              @if (registerForm.get('email')?.hasError('required') && registerForm.get('email')?.touched) {
-                <mat-error>El correo es requerido</mat-error>
-              }
-              @if (registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched) {
-                <mat-error>Correo inválido</mat-error>
-              }
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="w-full mb-4">
-              <mat-label>Contraseña</mat-label>
-              <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password">
-              <mat-icon matPrefix>lock</mat-icon>
-              <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
-                <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-              </button>
-              @if (registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched) {
-                <mat-error>La contraseña es requerida</mat-error>
-              }
-              @if (registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched) {
-                <mat-error>Mínimo 6 caracteres</mat-error>
-              }
-            </mat-form-field>
-
-            @if (errorMessage()) {
-              <div class="error-message bg-red-100 text-red-700 p-3 rounded mb-4">
-                {{ errorMessage() }}
-              </div>
-            }
-
-            @if (successMessage()) {
-              <div class="success-message bg-green-100 text-green-700 p-3 rounded mb-4">
-                {{ successMessage() }}
-              </div>
-            }
-
-            <button
-              mat-raised-button
-              color="primary"
-              type="submit"
-              class="w-full"
-              [disabled]="registerForm.invalid || isLoading()">
-              @if (isLoading()) {
-                <mat-spinner diameter="20"></mat-spinner>
-              } @else {
-                Registrarse
-              }
-            </button>
-          </form>
-
-          <div class="mt-4 text-center">
-            <p class="text-gray-600">
-              ¿Ya tienes cuenta?
-              <a routerLink="/auth/login" class="text-primary font-semibold">Inicia sesión</a>
-            </p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `,
-  styles: [`
-    .register-card {
-      padding: 2rem;
-    }
-  `]
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
 
   registerForm: FormGroup;
   hidePassword = signal(true);
+  hideConfirmPassword = signal(true);
   isLoading = signal(false);
   errorMessage = signal<string>('');
   successMessage = signal<string>('');
 
   constructor() {
     this.registerForm = this.fb.group({
-      name: ['', [Validators.required]],
+      // Credentials
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]]
-    });
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', [Validators.required]],
+
+      // Fiscal data
+      ruc: ['', [Validators.required, Validators.pattern(/^\d{6,8}-\d$/)]],
+      razonSocial: ['', [Validators.required, Validators.minLength(3)]],
+
+      // Timbrado
+      timbrado: ['', [Validators.required, Validators.pattern(/^\d+$/), Validators.minLength(8)]],
+      timbradoVence: ['', [Validators.required, futureDateValidator()]]
+    }, { validators: passwordMatchValidator() });
   }
 
   togglePasswordVisibility(): void {
     this.hidePassword.update(value => !value);
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.hideConfirmPassword.update(value => !value);
+  }
+
+  /**
+   * Check if a specific field is valid
+   */
+  isFieldValid(fieldName: string): boolean {
+    const field = this.registerForm.get(fieldName);
+    return !!(field && field.valid && field.touched);
+  }
+
+  /**
+   * Check if a form step (section) is valid
+   */
+  isStepValid(step: 'credentials' | 'fiscal' | 'timbrado'): boolean {
+    switch (step) {
+      case 'credentials':
+        return !!(
+          this.registerForm.get('firstName')?.valid &&
+          this.registerForm.get('lastName')?.valid &&
+          this.registerForm.get('email')?.valid &&
+          this.registerForm.get('password')?.valid &&
+          this.registerForm.get('confirmPassword')?.valid &&
+          !this.registerForm.hasError('passwordMismatch')
+        );
+      case 'fiscal':
+        return !!(
+          this.registerForm.get('ruc')?.valid &&
+          this.registerForm.get('razonSocial')?.valid
+        );
+      case 'timbrado':
+        return !!(
+          this.registerForm.get('timbrado')?.valid &&
+          this.registerForm.get('timbradoVence')?.valid
+        );
+      default:
+        return false;
+    }
   }
 
   onSubmit(): void {
@@ -142,19 +150,43 @@ export class RegisterComponent {
       this.errorMessage.set('');
       this.successMessage.set('');
 
-      const { name, email, password } = this.registerForm.value;
+      const formValue = this.registerForm.value;
 
-      this.authService.register(name, email, password).subscribe({
+      const userData: CreateUserDto = {
+        email: formValue.email,
+        password: formValue.password,
+        firstName: formValue.firstName,
+        lastName: formValue.lastName,
+        ruc: formValue.ruc,
+        razonSocial: formValue.razonSocial,
+        timbrado: formValue.timbrado,
+        timbradoVence: formValue.timbradoVence
+      };
+
+      this.authService.register(userData).subscribe({
         next: () => {
           this.isLoading.set(false);
           this.successMessage.set('Registro exitoso. Redirigiendo...');
+          this.snackBar.open('Registro exitoso. Bienvenido!', 'Cerrar', {
+            duration: 3000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['success-snackbar']
+          });
           setTimeout(() => {
             this.router.navigate(['/dashboard']);
           }, 1500);
         },
         error: (error) => {
           this.isLoading.set(false);
-          this.errorMessage.set(error.message || 'Error al registrarse. Intenta nuevamente.');
+          const errorMsg = error.message || 'Error al registrarse. Intenta nuevamente.';
+          this.errorMessage.set(errorMsg);
+          this.snackBar.open(errorMsg, 'Cerrar', {
+            duration: 5000,
+            horizontalPosition: 'end',
+            verticalPosition: 'top',
+            panelClass: ['error-snackbar']
+          });
         }
       });
     }

@@ -1,16 +1,34 @@
 <ion-tabs>
   <ion-tab-bar slot="bottom">
-    <ion-tab-button tab="home">
+    <!-- Home Tab -->
+    <ion-tab-button tab="home" class="tab-button">
       <ion-icon name="home-outline"></ion-icon>
       <ion-label>Inicio</ion-label>
+      @if (isOffline()) {
+        <ion-badge class="offline-badge" color="warning">
+          <ion-icon name="cloud-offline-outline" size="small"></ion-icon>
+        </ion-badge>
+      }
     </ion-tab-button>
 
-    <ion-tab-button tab="sales">
+    <!-- Sales Tab with Badge -->
+    <ion-tab-button tab="sales" class="tab-button">
       <ion-icon name="receipt-outline"></ion-icon>
       <ion-label>Ventas</ion-label>
+      @if (pendingSalesCount() > 0) {
+        <ion-badge class="counter-badge" color="danger">
+          {{ pendingSalesCount() }}
+        </ion-badge>
+      }
+      @if (isSyncing()) {
+        <div class="sync-indicator">
+          <ion-spinner name="dots" color="primary"></ion-spinner>
+        </div>
+      }
     </ion-tab-button>
 
-    <ion-tab-button tab="profile">
+    <!-- Profile Tab -->
+    <ion-tab-button tab="profile" class="tab-button">
       <ion-icon name="person-outline"></ion-icon>
       <ion-label>Perfil</ion-label>
     </ion-tab-button>

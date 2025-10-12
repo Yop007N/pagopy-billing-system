@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { SalesModule } from './sales/sales.module';
@@ -19,6 +20,9 @@ import { WebhooksModule } from './webhooks/webhooks.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+
+    // Database
+    PrismaModule,
 
     // Rate limiting
     ThrottlerModule.forRoot([

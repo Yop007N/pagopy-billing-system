@@ -36,6 +36,21 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'products/list',
+    loadComponent: () => import('./features/products/products-list/products-list.component').then(m => m.ProductsListComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'products/new',
+    loadComponent: () => import('./features/products/product-form/product-form.component').then(m => m.ProductFormComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'products/edit/:id',
+    loadComponent: () => import('./features/products/product-form/product-form.component').then(m => m.ProductFormComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: '**',
     redirectTo: 'dashboard'
   }

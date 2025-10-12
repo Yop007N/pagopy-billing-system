@@ -18,17 +18,36 @@ export interface Sale {
 
   // Montos
   subtotalGravado: number;
+  subtotal?: number; // Alias or calculated field for subtotalGravado
+  tax?: number; // Total tax (iva10 + iva5)
   iva10: number;
   iva5: number;
   exento: number;
   total: number;
+  discount?: number;
 
   // Pago
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  payment?: {
+    id: string;
+    amount: number;
+    method: PaymentMethod;
+    status: PaymentStatus;
+    transactionId?: string;
+    createdAt: Date;
+  };
 
   // Cliente
   customerType: CustomerType;
+  customerId?: string;
+  customer?: {
+    id: string;
+    name: string;
+    documentId: string;
+    email?: string;
+    phone?: string;
+  };
   customerRuc?: string;
   customerName?: string;
   customerEmail?: string;
@@ -50,6 +69,7 @@ export interface Sale {
 
   // Estado
   status: SaleStatus;
+  notes?: string;
 
   // Timestamps
   createdAt: Date;
@@ -90,4 +110,14 @@ export interface SalesSummary {
     count: number;
     total: number;
   };
+  allTime: {
+    count: number;
+    total: number;
+  };
+}
+
+export interface DailySalesStats {
+  date: string;
+  count: number;
+  total: number;
 }

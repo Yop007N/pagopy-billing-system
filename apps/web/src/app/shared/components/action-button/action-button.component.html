@@ -1,0 +1,24 @@
+<button
+  [type]="type"
+  [ngClass]="buttonClasses"
+  [disabled]="isDisabled"
+  (click)="onClick($event)">
+
+  <span class="button-content">
+    <mat-icon *ngIf="icon && iconPosition === 'left' && !loading" class="button-icon icon-left">
+      {{ icon }}
+    </mat-icon>
+
+    <mat-spinner
+      *ngIf="loading"
+      class="button-spinner"
+      [diameter]="size === 'small' ? 16 : size === 'medium' ? 20 : 24">
+    </mat-spinner>
+
+    <span class="button-label">{{ label }}</span>
+
+    <mat-icon *ngIf="icon && iconPosition === 'right' && !loading" class="button-icon icon-right">
+      {{ icon }}
+    </mat-icon>
+  </span>
+</button>

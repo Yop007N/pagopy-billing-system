@@ -1,40 +1,151 @@
 <ion-header [translucent]="true">
   <ion-toolbar color="primary">
     <ion-title>Perfil</ion-title>
+    <ion-chip slot="end" [color]="networkStatusColor()">
+      <ion-icon [name]="isOnline() ? 'cloud-done-outline' : 'cloud-offline-outline'"></ion-icon>
+      <ion-label>{{ networkStatusText() }}</ion-label>
+    </ion-chip>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <div class="profile-header">
-    <ion-icon name="person-circle-outline"></ion-icon>
-    <h2>{{ userInfo.name }}</h2>
-    <p>{{ userInfo.email }}</p>
-    <p class="business-name">{{ userInfo.businessName }}</p>
+  <div class="content-wrapper">
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <ion-avatar>
+        <ion-icon name="person-circle-outline"></ion-icon>
+      </ion-avatar>
+      <h2>{{ userInfo().name }}</h2>
+      <p>{{ userInfo().email }}</p>
+      <ion-chip color="primary">
+        <ion-label>{{ userInfo().role }}</ion-label>
+      </ion-chip>
+      <p class="business-name">{{ userInfo().businessName }}</p>
+    </div>
+
+    <!-- User Stats -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Mis Estadísticas</ion-card-title>
+      </ion-card-header>
+      <ion-card-content *ngIf="!loading()">
+        <ion-grid>
+          <ion-row>
+            <ion-col size="6">
+              <div class="stat-item">
+                <ion-icon name="receipt-outline" color="primary"></ion-icon>
+                <h3>{{ userStats().totalSales }}</h3>
+                <p>Total Ventas</p>
+              </div>
+            </ion-col>
+            <ion-col size="6">
+              <div class="stat-item">
+                <ion-icon name="cash-outline" color="success"></ion-icon>
+                <h3>{{ userStats().totalAmount | number:'1.0-0' }}</h3>
+                <p>Gs. Vendidos</p>
+              </div>
+            </ion-col>
+            <ion-col size="6">
+              <div class="stat-item">
+                <ion-icon name="sync-outline" [color]="userStats().pendingSync > 0 ? 'warning' : 'success'"></ion-icon>
+                <h3>{{ userStats().pendingSync }}</h3>
+                <p>Pendientes Sync</p>
+              </div>
+            </ion-col>
+            <ion-col size="6">
+              <div class="stat-item">
+                <ion-icon name="stats-chart-outline" color="tertiary"></ion-icon>
+                <h3>{{ (userStats().totalSales > 0 ? userStats().totalAmount / userStats().totalSales : 0) | number:'1.0-0' }}</h3>
+                <p>Promedio Venta</p>
+              </div>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+      <ion-card-content *ngIf="loading()" class="loading-content">
+        <ion-spinner name="crescent"></ion-spinner>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Sync Section -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Sincronización</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-button
+          expand="block"
+          (click)="triggerSync()"
+          [disabled]="!isOnline() || syncStatus().isSyncing"
+        >
+          <ion-icon *ngIf="!syncStatus().isSyncing" name="sync-outline" slot="start"></ion-icon>
+          <ion-spinner *ngIf="syncStatus().isSyncing" name="crescent" slot="start"></ion-spinner>
+          {{ syncStatus().isSyncing ? 'Sincronizando...' : 'Sincronizar Ahora' }}
+        </ion-button>
+
+        <div class="sync-info" *ngIf="userStats().lastSyncDate">
+          <ion-icon name="time-outline" color="medium"></ion-icon>
+          <small>Última sincronización: {{ userStats().lastSyncDate | date:'short' }}</small>
+        </div>
+
+        <div class="sync-info" *ngIf="!userStats().lastSyncDate">
+          <ion-icon name="time-outline" color="medium"></ion-icon>
+          <small>No se ha sincronizado aún</small>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Settings Section -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Configuración</ion-card-title>
+      </ion-card-header>
+      <ion-list>
+        <ion-item>
+          <ion-icon name="sync-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h3>Sincronización Automática</h3>
+            <p>Sincronizar cuando hay conexión</p>
+          </ion-label>
+          <ion-toggle
+            [checked]="autoSyncEnabled()"
+            (ionChange)="onAutoSyncToggle($event)"
+          ></ion-toggle>
+        </ion-item>
+
+        <ion-item button (click)="clearLocalData()">
+          <ion-icon name="trash-outline" slot="start" color="danger"></ion-icon>
+          <ion-label color="danger">
+            <h3>Borrar Datos Locales</h3>
+            <p>Eliminar todos los datos almacenados</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </ion-card>
+
+    <!-- Help and Support -->
+    <ion-list>
+      <ion-item button (click)="showAbout()">
+        <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>Acerca de</h3>
+          <p>Versión {{ appVersion }}</p>
+        </ion-label>
+      </ion-item>
+
+      <ion-item button (click)="showHelp()">
+        <ion-icon name="help-circle-outline" slot="start"></ion-icon>
+        <ion-label>
+          <h3>Ayuda y Soporte</h3>
+        </ion-label>
+      </ion-item>
+
+      <ion-item button (click)="logout()">
+        <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
+        <ion-label color="danger">
+          <h3>Cerrar Sesión</h3>
+        </ion-label>
+      </ion-item>
+    </ion-list>
   </div>
-
-  <ion-card>
-    <ion-card-content>
-      <ion-button expand="block" (click)="syncData()">
-        <ion-icon name="cloud-download-outline" slot="start"></ion-icon>
-        Sincronizar Datos
-      </ion-button>
-    </ion-card-content>
-  </ion-card>
-
-  <ion-list>
-    <ion-item button>
-      <ion-icon name="settings-outline" slot="start"></ion-icon>
-      <ion-label>Configuración</ion-label>
-    </ion-item>
-
-    <ion-item button>
-      <ion-icon name="help-circle-outline" slot="start"></ion-icon>
-      <ion-label>Ayuda y Soporte</ion-label>
-    </ion-item>
-
-    <ion-item button (click)="logout()">
-      <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
-      <ion-label color="danger">Cerrar Sesión</ion-label>
-    </ion-item>
-  </ion-list>
 </ion-content>

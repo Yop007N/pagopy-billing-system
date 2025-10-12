@@ -1,0 +1,155 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Clientes</ion-title>
+    <ion-buttons slot="end">
+      @if (syncPending()) {
+        <ion-button (click)="syncData()" [disabled]="!isOnline()">
+          <ion-icon slot="icon-only" name="syncCircle"></ion-icon>
+        </ion-button>
+      }
+      @if (!isOnline()) {
+        <ion-button disabled>
+          <ion-icon slot="icon-only" name="cloudOffline"></ion-icon>
+        </ion-button>
+      }
+    </ion-buttons>
+  </ion-toolbar>
+
+  <!-- Searchbar -->
+  <ion-toolbar>
+    <ion-searchbar
+      [debounce]="500"
+      placeholder="Buscar por nombre, RUC, documento..."
+      (ionInput)="onSearchChange($event)"
+      animated="true"
+    ></ion-searchbar>
+  </ion-toolbar>
+
+  <!-- Segment for filtering -->
+  <ion-toolbar>
+    <ion-segment [value]="selectedSegment()" (ionChange)="onSegmentChange($event)">
+      <ion-segment-button value="all">
+        <ion-label>Todos</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="individual">
+        <ion-label>Individuales</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="business">
+        <ion-label>Empresas</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <!-- Pull to Refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading Indicator -->
+  @if (loading() && customers().length === 0) {
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando clientes...</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && filteredCustomers().length === 0) {
+    <div class="empty-state">
+      <ion-icon name="personCircle" size="large"></ion-icon>
+      <h2>No hay clientes</h2>
+      <p>{{ searchQuery() ? 'No se encontraron resultados' : 'Comienza agregando tu primer cliente' }}</p>
+      @if (!searchQuery()) {
+        <ion-button (click)="addCustomer()">
+          <ion-icon slot="start" name="add"></ion-icon>
+          Agregar Cliente
+        </ion-button>
+      }
+    </div>
+  }
+
+  <!-- Customer List -->
+  @if (filteredCustomers().length > 0) {
+    <ion-list>
+      @for (customer of filteredCustomers(); track trackByCustomerId($index, customer)) {
+        <ion-item-sliding #slidingItem>
+          <ion-item (click)="viewCustomer(customer)" button detail>
+            <!-- Avatar with initials -->
+            <ion-avatar slot="start" [class.business-avatar]="customer.customerType === 'BUSINESS'">
+              <div class="avatar-initials">
+                {{ getInitials(customer.name) }}
+              </div>
+            </ion-avatar>
+
+            <!-- Customer Info -->
+            <ion-label>
+              <h2>{{ customer.name }}</h2>
+              <p>
+                <ion-icon [name]="getCustomerTypeIcon(customer.customerType)" size="small"></ion-icon>
+                {{ getCustomerTypeLabel(customer.customerType) }}
+                @if (customer.documentId) {
+                  <span class="separator">•</span>
+                  {{ customer.documentType }}: {{ customer.documentId }}
+                }
+              </p>
+              @if (customer.taxId) {
+                <p class="tax-id">RUC: {{ customer.taxId }}</p>
+              }
+              @if (customer.phone) {
+                <p class="contact-info">
+                  <ion-icon name="callOutline" size="small"></ion-icon>
+                  {{ customer.phone }}
+                </p>
+              }
+              @if (customer.email) {
+                <p class="contact-info">
+                  <ion-icon name="mailOutline" size="small"></ion-icon>
+                  {{ customer.email }}
+                </p>
+              }
+            </ion-label>
+
+            <!-- Status Badge -->
+            <ion-badge slot="end" [color]="customer.isActive ? 'success' : 'medium'">
+              {{ customer.isActive ? 'Activo' : 'Inactivo' }}
+            </ion-badge>
+
+            <!-- Sync Status Indicator -->
+            @if (!customer._synced) {
+              <ion-note slot="end" color="warning">
+                <ion-icon name="cloudOffline" size="small"></ion-icon>
+              </ion-note>
+            }
+          </ion-item>
+
+          <!-- Swipe Actions -->
+          <ion-item-options side="end">
+            <ion-item-option color="primary" (click)="editCustomer(customer, slidingItem)">
+              <ion-icon slot="icon-only" name="createOutline"></ion-icon>
+            </ion-item-option>
+            <ion-item-option color="danger" (click)="deleteCustomer(customer, slidingItem)">
+              <ion-icon slot="icon-only" name="trashOutline"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      }
+    </ion-list>
+
+    <!-- Infinite Scroll -->
+    <ion-infinite-scroll (ionInfinite)="loadMoreCustomers($event)" [disabled]="!hasMoreData()">
+      <ion-infinite-scroll-content
+        loadingSpinner="crescent"
+        loadingText="Cargando más clientes..."
+      ></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+  }
+
+  <!-- FAB: Add Customer -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="addCustomer()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

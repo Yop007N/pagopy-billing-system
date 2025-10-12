@@ -1,0 +1,222 @@
+// Invoice container
+.invoice-container {
+  padding: 0 0 24px 0;
+}
+
+// Loading container
+.loading-container {
+  padding: 16px;
+}
+
+// Status card
+.status-card {
+  margin: 16px;
+  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-primary-shade) 100%);
+  color: white;
+
+  ion-card-content {
+    padding: 24px;
+
+    .status-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      ion-icon {
+        font-size: 48px;
+      }
+
+      .status-info {
+        flex: 1;
+
+        h2 {
+          margin: 0 0 8px 0;
+          font-size: 24px;
+          font-weight: 600;
+          color: white;
+        }
+
+        ion-badge {
+          font-size: 12px;
+          padding: 6px 12px;
+        }
+      }
+    }
+  }
+}
+
+// Cards
+ion-card {
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  ion-card-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--ion-color-light);
+
+    ion-card-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ion-color-dark);
+
+      ion-icon {
+        font-size: 24px;
+        color: var(--ion-color-primary);
+      }
+    }
+  }
+
+  ion-card-content {
+    padding: 16px;
+
+    ion-list {
+      background: transparent;
+
+      ion-item {
+        --background: transparent;
+        --padding-start: 0;
+        --inner-padding-end: 0;
+        --min-height: 48px;
+
+        ion-label {
+          margin: 8px 0;
+
+          .label-text {
+            font-size: 12px;
+            color: var(--ion-color-medium);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          h3 {
+            font-size: 16px;
+            color: var(--ion-color-dark);
+            font-weight: 500;
+            margin: 0;
+            word-wrap: break-word;
+          }
+
+          p {
+            font-size: 14px;
+            color: var(--ion-color-medium-shade);
+            margin: 4px 0 0 0;
+          }
+
+          .item-calculation {
+            color: var(--ion-color-medium);
+            font-family: 'Courier New', monospace;
+          }
+        }
+
+        .amount-text {
+          font-size: 16px;
+          color: var(--ion-color-dark);
+          text-align: right;
+        }
+
+        .discount-text {
+          color: var(--ion-color-danger);
+        }
+
+        &.total-item {
+          border-top: 2px solid var(--ion-color-light);
+          margin-top: 8px;
+          padding-top: 8px;
+
+          .total-amount {
+            font-size: 20px;
+            color: var(--ion-color-success);
+          }
+        }
+      }
+    }
+  }
+}
+
+// QR Container
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+
+  .qr-image {
+    width: 200px;
+    height: 200px;
+    border: 2px solid var(--ion-color-light);
+    border-radius: 8px;
+    padding: 8px;
+    background: white;
+  }
+
+  .qr-text {
+    margin-top: 16px;
+    color: var(--ion-color-medium);
+    font-size: 14px;
+    text-align: center;
+  }
+}
+
+// Monospace text
+.monospace-text {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px !important;
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+// Totals card
+.totals-card {
+  background: var(--ion-color-light-tint);
+
+  ion-card-content {
+    padding: 16px;
+  }
+}
+
+// Action buttons
+.action-buttons-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  ion-button {
+    margin: 0;
+    --border-radius: 8px;
+    height: 48px;
+    font-weight: 500;
+
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+// Skeleton text
+ion-skeleton-text {
+  line-height: 16px;
+  margin: 8px 0;
+}
+
+// Responsive adjustments
+@media (min-width: 768px) {
+  .invoice-container {
+    max-width: 768px;
+    margin: 0 auto;
+  }
+
+  ion-card {
+    margin: 16px auto;
+  }
+
+  .action-buttons-container {
+    max-width: 768px;
+    margin: 0 auto;
+  }
+}

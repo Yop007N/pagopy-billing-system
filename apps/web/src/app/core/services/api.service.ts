@@ -4,9 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface RequestOptions {
-  headers?: HttpHeaders;
-  params?: HttpParams;
-  responseType?: 'json' | 'text' | 'blob' | 'arraybuffer';
+  headers?: HttpHeaders | { [header: string]: string | string[] };
+  params?: HttpParams | { [param: string]: string | number | boolean | ReadonlyArray<string | number | boolean> };
 }
 
 @Injectable({

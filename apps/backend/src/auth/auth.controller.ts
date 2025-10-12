@@ -1,39 +1,68 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Post, Get, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { LoginDto, RegisterDto, AuthResponseDto } from './dto';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'User login' })
-  @ApiResponse({ status: 200, description: 'Login successful' })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() loginDto: any) {
-    // TODO: Implement login logic
-    return { message: 'Login endpoint - To be implemented' };
-  }
-
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'User registration' })
-  @ApiResponse({ status: 201, description: 'User registered successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  async register(@Body() registerDto: any) {
-    // TODO: Implement registration logic
-    return { message: 'Register endpoint - To be implemented' };
+  @ApiOperation({ summary: 'Registrar nuevo usuario y empresa' })
+  @ApiResponse({
+    status: 201,
+    description: 'Usuario registrado exitosamente',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Datos de registro inválidos' })
+  @ApiResponse({ status: 409, description: 'Email o RUC ya registrado' })
+  async register(@Body() registerDto: RegisterDto): Promise<AuthResponseDto> {
+    return this.authService.register(registerDto);
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Iniciar sesión' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login exitoso',
+    type: AuthResponseDto,
+  })
+  @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
+  async login(@Body() loginDto: LoginDto): Promise<AuthResponseDto> {
+    return this.authService.login(loginDto);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Perfil del usuario',
+  })
+  @ApiResponse({ status: 401, description: 'No autenticado' })
+  async getProfile(@CurrentUser() user: any) {
+    return {
+      user,
+      message: 'Perfil obtenido exitosamente',
+    };
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Refresh access token' })
-  @ApiResponse({ status: 200, description: 'Token refreshed' })
-  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  async refresh(@Body() refreshDto: any) {
-    // TODO: Implement token refresh logic
-    return { message: 'Refresh endpoint - To be implemented' };
+  @ApiOperation({ summary: 'Refrescar access token' })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refrescado exitosamente',
+  })
+  @ApiResponse({ status: 401, description: 'Refresh token inválido' })
+  async refresh(@Body() body: { refreshToken: string }) {
+    return this.authService.refreshAccessToken(body.refreshToken);
   }
 }

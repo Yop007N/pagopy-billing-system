@@ -1,0 +1,76 @@
+<aside class="sidebar" [class.collapsed]="isCollapsed()">
+  <!-- Logo Section -->
+  <div class="sidebar-header">
+    <div class="logo-container">
+      <span class="logo-icon material-icons">payment</span>
+      <span class="logo-text" *ngIf="!isCollapsed()">PagoPy</span>
+    </div>
+    <button
+      class="toggle-btn"
+      (click)="toggleSidebar()"
+      [attr.aria-label]="isCollapsed() ? 'Expandir menú' : 'Contraer menú'">
+      <span class="material-icons">
+        {{ isCollapsed() ? 'chevron_right' : 'chevron_left' }}
+      </span>
+    </button>
+  </div>
+
+  <!-- User Profile Section -->
+  <div class="user-profile" *ngIf="currentUser()">
+    <div class="user-avatar">
+      <span class="material-icons">account_circle</span>
+    </div>
+    <div class="user-info" *ngIf="!isCollapsed()">
+      <div class="user-name">{{ currentUser()?.name }}</div>
+      <div class="user-role">{{ currentUser()?.role }}</div>
+    </div>
+  </div>
+
+  <!-- Navigation Items -->
+  <nav class="sidebar-nav">
+    <ul class="nav-list">
+      <li *ngFor="let item of navItems" class="nav-item">
+        <!-- Parent item -->
+        <div
+          class="nav-link"
+          [class.has-children]="item.children && item.children.length > 0"
+          [class.expanded]="isExpanded(item)"
+          (click)="toggleExpand(item)"
+          [routerLink]="!item.children ? item.route : null"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }">
+          <span class="nav-icon material-icons">{{ item.icon }}</span>
+          <span class="nav-label" *ngIf="!isCollapsed()">{{ item.label }}</span>
+          <span
+            class="expand-icon material-icons"
+            *ngIf="item.children && item.children.length > 0 && !isCollapsed()">
+            {{ isExpanded(item) ? 'expand_less' : 'expand_more' }}
+          </span>
+        </div>
+
+        <!-- Children items -->
+        <ul
+          class="nav-children"
+          *ngIf="item.children && item.children.length > 0 && isExpanded(item) && !isCollapsed()">
+          <li *ngFor="let child of item.children" class="nav-child-item">
+            <a
+              class="nav-child-link"
+              [routerLink]="child.route"
+              routerLinkActive="active">
+              <span class="nav-icon material-icons">{{ child.icon }}</span>
+              <span class="nav-label">{{ child.label }}</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Logout Button -->
+  <div class="sidebar-footer">
+    <button class="logout-btn" (click)="logout()">
+      <span class="material-icons">logout</span>
+      <span *ngIf="!isCollapsed()">Cerrar Sesión</span>
+    </button>
+  </div>
+</aside>

@@ -1,0 +1,37 @@
+<!-- Auth Layout (Login/Register) -->
+<div class="auth-layout" *ngIf="isAuthRoute()">
+  <router-outlet />
+</div>
+
+<!-- Main Application Layout -->
+<div class="app-layout" *ngIf="showMainLayout()">
+  <!-- Sidebar Navigation -->
+  <app-sidebar />
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Toolbar -->
+    <app-toolbar (menuToggle)="toggleSidebar()" />
+
+    <!-- Breadcrumb Navigation -->
+    <app-breadcrumb />
+
+    <!-- Page Content -->
+    <main class="page-content">
+      <div class="content-wrapper">
+        <router-outlet />
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <app-footer />
+  </div>
+</div>
+
+<!-- Fallback for unauthenticated users not on auth routes -->
+<div class="loading-layout" *ngIf="!showMainLayout() && !isAuthRoute()">
+  <div class="loading-spinner">
+    <span class="material-icons rotating">refresh</span>
+    <p>Cargando...</p>
+  </div>
+</div>

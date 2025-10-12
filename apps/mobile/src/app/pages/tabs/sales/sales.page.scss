@@ -1,14 +1,125 @@
+.stats-bar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  white-space: nowrap;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  ion-chip {
+    margin: 0;
+    font-size: 12px;
+  }
+}
+
+.filters-section {
+  padding: 12px;
+  background: var(--ion-color-light);
+  border-bottom: 1px solid var(--ion-color-light-shade);
+
+  ion-searchbar {
+    padding: 0 0 8px 0;
+  }
+
+  .filter-row {
+    margin-bottom: 8px;
+
+    ion-segment {
+      --background: var(--ion-color-light-tint);
+    }
+  }
+
+  .payment-filter {
+    ion-select {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+}
+
+ion-list {
+  padding: 0;
+
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --inner-padding-end: 8px;
+
+    ion-label {
+      margin: 12px 0;
+
+      h2 {
+        font-size: 16px;
+        margin-bottom: 4px;
+      }
+
+      h3 {
+        font-size: 18px;
+        margin-bottom: 4px;
+      }
+
+      p {
+        font-size: 13px;
+        color: var(--ion-color-medium);
+        margin: 2px 0;
+      }
+
+      ion-badge {
+        margin-top: 4px;
+        font-size: 10px;
+      }
+    }
+  }
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  padding: 32px;
+  padding: 64px 24px;
+  text-align: center;
+  min-height: 400px;
+
+  ion-icon {
+    font-size: 80px;
+    margin-bottom: 24px;
+    opacity: 0.5;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+    margin: 0 0 12px 0;
+  }
 
   p {
+    font-size: 14px;
     color: var(--ion-color-medium);
-    margin-bottom: 24px;
-    font-size: 16px;
+    margin: 0 0 24px 0;
+    max-width: 300px;
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+  min-height: 400px;
+
+  ion-spinner {
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 14px;
+    color: var(--ion-color-medium);
   }
 }

@@ -1,6 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormArray, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +10,26 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
+import { firstValueFrom } from 'rxjs';
+import { SalesService } from '../../../core/services/sales.service';
+import { ProductsService } from '../../../core/services/products.service';
+import { PaymentMethod, CustomerType, Product } from '@pago-py/shared-models';
+
+interface SaleTotals {
+  subtotalGravado10: number;
+  iva10: number;
+  subtotalGravado5: number;
+  iva5: number;
+  exento: number;
+  subtotal: number;
+  discountAmount: number;
+  total: number;
+}
 
 @Component({
   selector: 'app-new-sale',
@@ -24,228 +44,364 @@ import { MatDividerModule } from '@angular/material/divider';
     MatIconModule,
     MatSelectModule,
     MatTableModule,
-    MatDividerModule
+    MatDividerModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
+    MatAutocompleteModule,
+    MatTooltipModule,
+    MatChipsModule
   ],
-  template: `
-    <div class="new-sale-container">
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold">Nueva Venta</h1>
-        <button mat-stroked-button (click)="goBack()">
-          <mat-icon>arrow_back</mat-icon>
-          Volver
-        </button>
-      </div>
-
-      <form [formGroup]="saleForm" (ngSubmit)="onSubmit()">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <!-- Cliente Information -->
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>Información del Cliente</mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="mt-4">
-              <mat-form-field appearance="outline" class="w-full mb-4">
-                <mat-label>Cliente</mat-label>
-                <mat-select formControlName="customerId">
-                  <mat-option [value]="1">Cliente General</mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="w-full mb-4">
-                <mat-label>RUC/CI</mat-label>
-                <input matInput formControlName="customerDocument">
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Dirección</mat-label>
-                <textarea matInput formControlName="customerAddress" rows="2"></textarea>
-              </mat-form-field>
-            </mat-card-content>
-          </mat-card>
-
-          <!-- Sale Information -->
-          <mat-card>
-            <mat-card-header>
-              <mat-card-title>Información de la Venta</mat-card-title>
-            </mat-card-header>
-            <mat-card-content class="mt-4">
-              <mat-form-field appearance="outline" class="w-full mb-4">
-                <mat-label>Tipo de Factura</mat-label>
-                <mat-select formControlName="invoiceType">
-                  <mat-option value="contado">Contado</mat-option>
-                  <mat-option value="credito">Crédito</mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="w-full mb-4">
-                <mat-label>Condición de Pago</mat-label>
-                <mat-select formControlName="paymentCondition">
-                  <mat-option value="efectivo">Efectivo</mat-option>
-                  <mat-option value="tarjeta">Tarjeta</mat-option>
-                  <mat-option value="transferencia">Transferencia</mat-option>
-                </mat-select>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="w-full">
-                <mat-label>Fecha</mat-label>
-                <input matInput type="date" formControlName="saleDate">
-              </mat-form-field>
-            </mat-card-content>
-          </mat-card>
-        </div>
-
-        <!-- Items Section -->
-        <mat-card class="mt-6">
-          <mat-card-header>
-            <mat-card-title>Items de la Venta</mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="mt-4">
-            <div formArrayName="items">
-              @for (item of items.controls; track $index; let i = $index) {
-                <div [formGroupName]="i" class="grid grid-cols-12 gap-4 mb-4 items-start">
-                  <mat-form-field appearance="outline" class="col-span-4">
-                    <mat-label>Producto</mat-label>
-                    <input matInput formControlName="product">
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="col-span-2">
-                    <mat-label>Cantidad</mat-label>
-                    <input matInput type="number" formControlName="quantity" (input)="calculateItemTotal(i)">
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="col-span-2">
-                    <mat-label>Precio Unit.</mat-label>
-                    <input matInput type="number" formControlName="unitPrice" (input)="calculateItemTotal(i)">
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="col-span-3">
-                    <mat-label>Total</mat-label>
-                    <input matInput type="number" formControlName="total" readonly>
-                  </mat-form-field>
-
-                  <button mat-icon-button color="warn" type="button" (click)="removeItem(i)" class="col-span-1">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </div>
-              }
-            </div>
-
-            <button mat-stroked-button type="button" (click)="addItem()" class="w-full mt-2">
-              <mat-icon>add</mat-icon>
-              Agregar Item
-            </button>
-
-            <mat-divider class="my-6"></mat-divider>
-
-            <div class="totals-section bg-gray-50 p-4 rounded">
-              <div class="flex justify-between mb-2">
-                <span class="font-medium">Subtotal:</span>
-                <span class="text-lg">{{ calculateSubtotal() | currency:'PYG':'symbol-narrow' }}</span>
-              </div>
-              <div class="flex justify-between mb-2">
-                <span class="font-medium">IVA (10%):</span>
-                <span class="text-lg">{{ calculateTax() | currency:'PYG':'symbol-narrow' }}</span>
-              </div>
-              <mat-divider class="my-3"></mat-divider>
-              <div class="flex justify-between">
-                <span class="font-bold text-xl">Total:</span>
-                <span class="font-bold text-xl text-primary">{{ calculateTotal() | currency:'PYG':'symbol-narrow' }}</span>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <div class="flex justify-end gap-4 mt-6">
-          <button mat-stroked-button type="button" (click)="goBack()">
-            Cancelar
-          </button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="saleForm.invalid">
-            <mat-icon>save</mat-icon>
-            Guardar Venta
-          </button>
-        </div>
-      </form>
-    </div>
-  `,
-  styles: [`
-    .totals-section {
-      max-width: 400px;
-      margin-left: auto;
-    }
-  `]
+  templateUrl: './new-sale.component.html',
+  styleUrls: ['./new-sale.component.scss']
 })
-export class NewSaleComponent {
+export class NewSaleComponent implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private salesService = inject(SalesService);
+  private productsService = inject(ProductsService);
+  private snackBar = inject(MatSnackBar);
+
+  // Expose enums to template
+  readonly PaymentMethod = PaymentMethod;
+  readonly CustomerType = CustomerType;
+
+  // Signals
+  loading = signal(false);
+  availableProducts = signal<Product[]>([]);
+  productSearchControl = new FormControl('');
+
+  // Filtered products based on search
+  filteredProducts = computed(() => {
+    const searchTerm = this.productSearchControl.value?.toLowerCase() || '';
+    if (!searchTerm) {
+      return this.availableProducts();
+    }
+
+    return this.availableProducts().filter(product =>
+      product.name.toLowerCase().includes(searchTerm) ||
+      product.code?.toLowerCase().includes(searchTerm) ||
+      product.description?.toLowerCase().includes(searchTerm)
+    );
+  });
+
+  // Totals signal with discount support
+  totals = signal<SaleTotals>({
+    subtotalGravado10: 0,
+    iva10: 0,
+    subtotalGravado5: 0,
+    iva5: 0,
+    exento: 0,
+    subtotal: 0,
+    discountAmount: 0,
+    total: 0
+  });
 
   saleForm: FormGroup;
 
   constructor() {
     this.saleForm = this.fb.group({
-      customerId: [1, Validators.required],
-      customerDocument: [''],
-      customerAddress: [''],
-      invoiceType: ['contado', Validators.required],
-      paymentCondition: ['efectivo', Validators.required],
-      saleDate: [new Date().toISOString().split('T')[0], Validators.required],
-      items: this.fb.array([])
+      // Customer info
+      customerType: [CustomerType.CONSUMER, Validators.required],
+      customerName: ['', Validators.required],
+      customerRuc: ['', Validators.pattern(/^\d{6,8}-\d$/)],
+      customerEmail: ['', Validators.email],
+      customerPhone: [''],
+
+      // Payment info
+      paymentMethod: [PaymentMethod.CASH, Validators.required],
+      discount: [0, [Validators.min(0), Validators.max(100)]],
+      notes: [''],
+
+      // Items
+      items: this.fb.array([], Validators.required)
     });
 
+    // Add first item by default
     this.addItem();
+  }
+
+  async ngOnInit() {
+    await this.loadProducts();
+  }
+
+  async loadProducts(): Promise<void> {
+    try {
+      this.loading.set(true);
+      const response = await firstValueFrom(
+        this.productsService.getProducts({ isActive: true, limit: 1000 })
+      );
+      this.availableProducts.set(response.data);
+    } catch (err) {
+      console.error('Error loading products:', err);
+      this.snackBar.open('Error al cargar productos', 'Cerrar', { duration: 3000 });
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   get items(): FormArray {
     return this.saleForm.get('items') as FormArray;
   }
 
+  /**
+   * Display function for autocomplete
+   */
+  displayProduct(product: Product | null): string {
+    return product ? product.name : '';
+  }
+
+  /**
+   * Clear product search
+   */
+  clearProductSearch(): void {
+    this.productSearchControl.setValue('');
+  }
+
+  /**
+   * Handle product selection from autocomplete
+   */
+  onProductSearchSelected(product: Product): void {
+    if (!product || !product.isActive) {
+      this.snackBar.open('Producto no disponible', 'Cerrar', { duration: 3000 });
+      return;
+    }
+
+    // Check if product already exists in items
+    const existingItemIndex = this.items.controls.findIndex(
+      control => control.get('concept')?.value === product.name
+    );
+
+    if (existingItemIndex >= 0) {
+      // Increment quantity if product already exists
+      const existingItem = this.items.at(existingItemIndex);
+      const currentQuantity = existingItem.get('quantity')?.value || 0;
+      existingItem.get('quantity')?.setValue(currentQuantity + 1);
+      this.calculateItemTotal(existingItemIndex);
+
+      this.snackBar.open('Cantidad incrementada', 'OK', { duration: 2000 });
+    } else {
+      // Add new item with product data
+      this.addItemWithProduct(product);
+    }
+
+    // Clear search
+    this.clearProductSearch();
+  }
+
+  /**
+   * Add item with product data
+   */
+  addItemWithProduct(product: Product): void {
+    const itemGroup = this.fb.group({
+      productId: [product.id],
+      concept: [product.name, Validators.required],
+      quantity: [1, [Validators.required, Validators.min(1)]],
+      amount: [product.price, [Validators.required, Validators.min(0)]],
+      iva: [product.taxRate, Validators.required],
+      subtotal: [{ value: product.price, disabled: true }]
+    });
+
+    this.items.push(itemGroup);
+    this.calculateItemTotal(this.items.length - 1);
+
+    this.snackBar.open('Producto agregado', 'OK', { duration: 2000 });
+  }
+
+  /**
+   * Add empty item
+   */
   addItem(): void {
     const itemGroup = this.fb.group({
-      product: ['', Validators.required],
+      productId: [null], // Will be set to manual ID when submitting
+      concept: ['', Validators.required],
       quantity: [1, [Validators.required, Validators.min(1)]],
-      unitPrice: [0, [Validators.required, Validators.min(0)]],
-      total: [{ value: 0, disabled: true }]
+      amount: [0, [Validators.required, Validators.min(0)]],
+      iva: [10, Validators.required],
+      subtotal: [{ value: 0, disabled: true }]
     });
 
     this.items.push(itemGroup);
   }
 
+  /**
+   * Remove item from array
+   */
   removeItem(index: number): void {
-    this.items.removeAt(index);
-  }
-
-  calculateItemTotal(index: number): void {
-    const item = this.items.at(index);
-    const quantity = item.get('quantity')?.value || 0;
-    const unitPrice = item.get('unitPrice')?.value || 0;
-    const total = quantity * unitPrice;
-    item.get('total')?.setValue(total);
-  }
-
-  calculateSubtotal(): number {
-    let subtotal = 0;
-    this.items.controls.forEach(item => {
-      subtotal += item.get('total')?.value || 0;
-    });
-    return subtotal;
-  }
-
-  calculateTax(): number {
-    return this.calculateSubtotal() * 0.1;
-  }
-
-  calculateTotal(): number {
-    return this.calculateSubtotal() + this.calculateTax();
-  }
-
-  onSubmit(): void {
-    if (this.saleForm.valid) {
-      console.log('Sale Data:', this.saleForm.getRawValue());
-      // TODO: Implement API call to save sale
-      this.router.navigate(['/sales/list']);
+    if (this.items.length > 1) {
+      this.items.removeAt(index);
+      this.calculateAllTotals();
+      this.snackBar.open('Item eliminado', 'OK', { duration: 2000 });
+    } else {
+      this.snackBar.open('Debe haber al menos un item', 'Cerrar', { duration: 3000 });
     }
   }
 
+  /**
+   * Calculate total for a specific item
+   */
+  calculateItemTotal(index: number): void {
+    const item = this.items.at(index);
+    const quantity = item.get('quantity')?.value || 0;
+    const amount = item.get('amount')?.value || 0;
+    const subtotal = quantity * amount;
+
+    item.get('subtotal')?.setValue(subtotal);
+    this.calculateAllTotals();
+  }
+
+  /**
+   * Calculate all totals including IVA and discount
+   */
+  calculateAllTotals(): void {
+    let subtotalGravado10 = 0;
+    let subtotalGravado5 = 0;
+    let exento = 0;
+
+    // Calculate subtotals by IVA rate
+    this.items.controls.forEach(item => {
+      const subtotal = item.get('subtotal')?.value || 0;
+      const iva = item.get('iva')?.value || 0;
+
+      if (iva === 10) {
+        subtotalGravado10 += subtotal;
+      } else if (iva === 5) {
+        subtotalGravado5 += subtotal;
+      } else {
+        exento += subtotal;
+      }
+    });
+
+    // Calculate IVA amounts
+    const iva10 = subtotalGravado10 * 0.10;
+    const iva5 = subtotalGravado5 * 0.05;
+
+    // Calculate subtotal before discount
+    const subtotal = subtotalGravado10 + iva10 + subtotalGravado5 + iva5 + exento;
+
+    // Calculate discount
+    const discountPercent = this.saleForm.get('discount')?.value || 0;
+    const discountAmount = (subtotal * discountPercent) / 100;
+
+    // Calculate final total
+    const total = subtotal - discountAmount;
+
+    this.totals.set({
+      subtotalGravado10,
+      iva10,
+      subtotalGravado5,
+      iva5,
+      exento,
+      subtotal,
+      discountAmount,
+      total
+    });
+  }
+
+  /**
+   * Validate and submit the sale
+   */
+  async onSubmit(): Promise<void> {
+    // Validate form
+    if (this.saleForm.invalid) {
+      this.markFormGroupTouched(this.saleForm);
+      this.snackBar.open('Por favor complete todos los campos requeridos', 'Cerrar', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    // Validate at least one item
+    if (this.items.length === 0) {
+      this.snackBar.open('Debe agregar al menos un item a la venta', 'Cerrar', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    // Validate all items have positive amounts
+    const hasInvalidItems = this.items.controls.some(item => {
+      const quantity = item.get('quantity')?.value || 0;
+      const amount = item.get('amount')?.value || 0;
+      return quantity <= 0 || amount < 0;
+    });
+
+    if (hasInvalidItems) {
+      this.snackBar.open('Todos los items deben tener cantidades y precios válidos', 'Cerrar', {
+        duration: 3000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    this.loading.set(true);
+
+    try {
+      const formValue = this.saleForm.getRawValue();
+
+      // Map form items to SaleItem format expected by backend
+      const items = formValue.items.map((item: any) => ({
+        productId: item.productId || 'manual-item-' + Date.now(), // Use manual ID for non-product items
+        concept: item.concept,
+        amount: item.amount,
+        quantity: item.quantity,
+        iva: item.iva
+      }));
+
+      // Prepare sale data
+      const saleData = {
+        items,
+        paymentMethod: formValue.paymentMethod,
+        customerType: formValue.customerType,
+        customerName: formValue.customerName,
+        customerRuc: formValue.customerRuc || undefined,
+        customerEmail: formValue.customerEmail || undefined,
+        customerPhone: formValue.customerPhone || undefined
+      };
+
+      // Create sale
+      const createdSale = await firstValueFrom(this.salesService.createSale(saleData));
+
+      this.snackBar.open('Venta registrada exitosamente', 'Cerrar', {
+        duration: 3000,
+        panelClass: ['success-snackbar']
+      });
+
+      // Navigate to sales list
+      this.router.navigate(['/sales/list']);
+    } catch (error: any) {
+      console.error('Error creating sale:', error);
+      this.snackBar.open(
+        error.error?.message || 'Error al registrar la venta. Intente nuevamente.',
+        'Cerrar',
+        { duration: 5000, panelClass: ['error-snackbar'] }
+      );
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  /**
+   * Mark all form fields as touched to show validation errors
+   */
+  private markFormGroupTouched(formGroup: FormGroup | FormArray): void {
+    Object.keys(formGroup.controls).forEach(key => {
+      const control = formGroup.get(key);
+      control?.markAsTouched();
+
+      if (control instanceof FormGroup || control instanceof FormArray) {
+        this.markFormGroupTouched(control);
+      }
+    });
+  }
+
+  /**
+   * Navigate back to dashboard
+   */
   goBack(): void {
-    this.router.navigate(['/dashboard']);
+    if (confirm('¿Está seguro que desea cancelar? Se perderán los datos ingresados.')) {
+      this.router.navigate(['/dashboard']);
+    }
   }
 }

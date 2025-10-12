@@ -1,0 +1,341 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/invoices"></ion-back-button>
+    </ion-buttons>
+    <ion-title>Detalle de Factura</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="shareInvoice()" *ngIf="invoice()">
+        <ion-icon slot="icon-only" name="share-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content
+      pullingIcon="chevron-down-circle-outline"
+      pullingText="Desliza para actualizar"
+      refreshingSpinner="circles"
+      refreshingText="Actualizando...">
+    </ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Loading skeleton -->
+  <div *ngIf="loading() && !invoice()" class="loading-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 40%"></ion-skeleton-text>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-skeleton-text [animated]="true" style="width: 90%"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 85%"></ion-skeleton-text>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Invoice details -->
+  <div *ngIf="!loading() && invoice()" class="invoice-container">
+    <!-- Status card -->
+    <ion-card class="status-card">
+      <ion-card-content>
+        <div class="status-header">
+          <ion-icon [name]="getStatusIcon(invoice()!.status)" [color]="invoicesService.getStatusColor(invoice()!.status)"></ion-icon>
+          <div class="status-info">
+            <h2>{{ invoice()!.invoiceNumber }}</h2>
+            <ion-badge [color]="invoicesService.getStatusColor(invoice()!.status)">
+              {{ invoicesService.getStatusLabel(invoice()!.status) }}
+            </ion-badge>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- SET Information -->
+    <ion-card *ngIf="invoice()!.cdc || invoice()!.kude">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="key-outline"></ion-icon>
+          Información SET
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item *ngIf="invoice()!.cdc">
+            <ion-label>
+              <p class="label-text">CDC (Código de Control)</p>
+              <h3 class="monospace-text">{{ invoice()!.cdc }}</h3>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="invoice()!.kude">
+            <ion-label>
+              <p class="label-text">KUDE</p>
+              <h3 class="monospace-text">{{ invoice()!.kude }}</h3>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="invoice()!.timbradoNumber">
+            <ion-label>
+              <p class="label-text">Timbrado</p>
+              <h3>{{ invoice()!.timbradoNumber }}</h3>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="invoice()!.setApprovedAt">
+            <ion-label>
+              <p class="label-text">Aprobado en SET</p>
+              <h3>{{ formatDate(invoice()!.setApprovedAt) }}</h3>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="invoice()!.setResponse" button (click)="viewSetResponse()">
+            <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+            <ion-label>
+              <h3>Ver respuesta completa de SET</h3>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- QR Code -->
+    <ion-card *ngIf="invoice()!.qrCode">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="qr-code-outline"></ion-icon>
+          Código QR
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content class="qr-container">
+        <img [src]="invoice()!.qrCode" alt="QR Code" class="qr-image">
+        <p class="qr-text">Escanea para verificar la factura</p>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Customer Information -->
+    <ion-card *ngIf="invoice()!.sale?.customer">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="person-outline"></ion-icon>
+          Cliente
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-label>
+              <p class="label-text">Nombre / Razón Social</p>
+              <h3>{{ invoice()!.sale!.customer!.name }}</h3>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <p class="label-text">Documento</p>
+              <h3>{{ invoice()!.sale!.customer!.documentType }}: {{ invoice()!.sale!.customer!.documentId }}</h3>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="invoice()!.sale!.customer!.email">
+            <ion-label>
+              <p class="label-text">Email</p>
+              <h3>{{ invoice()!.sale!.customer!.email }}</h3>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="invoice()!.sale!.customer!.phone">
+            <ion-label>
+              <p class="label-text">Teléfono</p>
+              <h3>{{ invoice()!.sale!.customer!.phone }}</h3>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Sale Items -->
+    <ion-card *ngIf="invoice()!.sale?.items && invoice()!.sale!.items!.length > 0">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="list-outline"></ion-icon>
+          Productos / Servicios
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let item of invoice()!.sale!.items">
+            <ion-label>
+              <h3>{{ item.product.name }}</h3>
+              <p>{{ item.product.code }}</p>
+              <p class="item-calculation">
+                {{ item.quantity }} x Gs. {{ formatCurrency(item.unitPrice) }} = Gs. {{ formatCurrency(item.total) }}
+              </p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Totals -->
+    <ion-card class="totals-card">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="cash-outline"></ion-icon>
+          Resumen
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-label>Subtotal</ion-label>
+            <ion-label slot="end" class="amount-text">
+              Gs. {{ formatCurrency(invoice()!.sale?.subtotal || 0) }}
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="invoice()!.sale?.tax">
+            <ion-label>IVA</ion-label>
+            <ion-label slot="end" class="amount-text">
+              Gs. {{ formatCurrency(invoice()!.sale!.tax) }}
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="invoice()!.sale?.discount">
+            <ion-label>Descuento</ion-label>
+            <ion-label slot="end" class="amount-text discount-text">
+              - Gs. {{ formatCurrency(invoice()!.sale!.discount) }}
+            </ion-label>
+          </ion-item>
+
+          <ion-item class="total-item">
+            <ion-label><strong>Total</strong></ion-label>
+            <ion-label slot="end" class="total-amount">
+              <strong>Gs. {{ formatCurrency(invoice()!.sale?.total || 0) }}</strong>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Payment Method -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="card-outline"></ion-icon>
+          Información de Pago
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-label>
+              <p class="label-text">Método de pago</p>
+              <h3>{{ invoice()!.sale?.paymentMethod }}</h3>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <p class="label-text">Fecha de venta</p>
+              <h3>{{ formatDate(invoice()!.sale?.saleDate || null) }}</h3>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- PDF Information -->
+    <ion-card *ngIf="invoice()!.pdfGenerated">
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="document-text-outline"></ion-icon>
+          Documento PDF
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-item lines="none">
+          <ion-icon name="checkmark-circle-outline" color="success" slot="start"></ion-icon>
+          <ion-label>
+            <h3>PDF generado</h3>
+            <p>El documento está disponible para descarga</p>
+          </ion-label>
+        </ion-item>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Timestamps -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          <ion-icon name="calendar-outline"></ion-icon>
+          Fechas
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list lines="none">
+          <ion-item>
+            <ion-label>
+              <p class="label-text">Creada</p>
+              <h3>{{ formatDate(invoice()!.createdAt) }}</h3>
+            </ion-label>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>
+              <p class="label-text">Última actualización</p>
+              <h3>{{ formatDate(invoice()!.updatedAt) }}</h3>
+            </ion-label>
+          </ion-item>
+
+          <ion-item *ngIf="invoice()!.sentToCustomerAt">
+            <ion-label>
+              <p class="label-text">Enviada al cliente</p>
+              <h3>{{ formatDate(invoice()!.sentToCustomerAt) }}</h3>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Action buttons -->
+    <div class="action-buttons-container">
+      <ion-button expand="block" (click)="downloadPdf()" *ngIf="invoice()!.pdfGenerated">
+        <ion-icon slot="start" name="download-outline"></ion-icon>
+        Descargar PDF
+      </ion-button>
+
+      <ion-button expand="block" fill="outline" (click)="shareInvoice()">
+        <ion-icon slot="start" name="share-outline"></ion-icon>
+        Compartir Factura
+      </ion-button>
+
+      <ion-button expand="block" color="secondary" fill="outline" (click)="printInvoice()">
+        <ion-icon slot="start" name="print-outline"></ion-icon>
+        Imprimir Factura
+      </ion-button>
+
+      <ion-button expand="block" color="warning" fill="outline" (click)="checkSetStatus()"
+        *ngIf="invoice()!.status === 'PENDING' || invoice()!.status === 'APPROVED'">
+        <ion-icon slot="start" name="sync-outline"></ion-icon>
+        Consultar Estado en SET
+      </ion-button>
+
+      <ion-button expand="block" color="warning" (click)="resendToSet()"
+        *ngIf="invoice()!.status === 'PENDING' || invoice()!.status === 'REJECTED'">
+        <ion-icon slot="start" name="sync-outline"></ion-icon>
+        Reenviar a SET
+      </ion-button>
+
+      <ion-button expand="block" color="danger" fill="outline" (click)="cancelInvoice()"
+        *ngIf="invoice()!.status !== 'CANCELLED'">
+        <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+        Anular Factura
+      </ion-button>
+    </div>
+  </div>
+</ion-content>

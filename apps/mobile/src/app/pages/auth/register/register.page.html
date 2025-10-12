@@ -9,20 +9,69 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <ion-card>
+    <ion-card-header>
+      <ion-card-title>Crear Cuenta Nueva</ion-card-title>
+    </ion-card-header>
+
     <ion-card-content>
       <form (ngSubmit)="onRegister()">
-        <ion-item>
+        <!-- Personal Information Section -->
+        <div class="section-header">
+          <ion-icon name="person-outline"></ion-icon>
+          <ion-text color="medium">
+            <h3>Información Personal</h3>
+          </ion-text>
+        </div>
+
+        <!-- First Name -->
+        <ion-item
+          [class.ion-invalid]="fieldErrors().firstName"
+          [class.ion-touched]="fieldErrors().firstName">
+          <ion-icon name="person-outline" slot="start"></ion-icon>
           <ion-input
-            label="Nombre completo"
+            label="Nombre"
             labelPlacement="floating"
             type="text"
-            [(ngModel)]="userData.name"
-            name="name"
+            [(ngModel)]="userData.firstName"
+            name="firstName"
             required
+            [disabled]="loading()"
+            placeholder="Juan"
+            autocomplete="given-name"
           ></ion-input>
         </ion-item>
+        <ion-note color="danger" *ngIf="fieldErrors().firstName" class="field-error">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors().firstName }}
+        </ion-note>
 
-        <ion-item>
+        <!-- Last Name -->
+        <ion-item
+          [class.ion-invalid]="fieldErrors().lastName"
+          [class.ion-touched]="fieldErrors().lastName">
+          <ion-icon name="person-outline" slot="start"></ion-icon>
+          <ion-input
+            label="Apellido"
+            labelPlacement="floating"
+            type="text"
+            [(ngModel)]="userData.lastName"
+            name="lastName"
+            required
+            [disabled]="loading()"
+            placeholder="Pérez"
+            autocomplete="family-name"
+          ></ion-input>
+        </ion-item>
+        <ion-note color="danger" *ngIf="fieldErrors().lastName" class="field-error">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors().lastName }}
+        </ion-note>
+
+        <!-- Email -->
+        <ion-item
+          [class.ion-invalid]="fieldErrors().email"
+          [class.ion-touched]="fieldErrors().email">
+          <ion-icon name="mail-outline" slot="start"></ion-icon>
           <ion-input
             label="Correo electrónico"
             labelPlacement="floating"
@@ -30,35 +79,265 @@
             [(ngModel)]="userData.email"
             name="email"
             required
+            [disabled]="loading()"
+            placeholder="usuario@ejemplo.com"
+            autocomplete="email"
+            inputmode="email"
           ></ion-input>
         </ion-item>
+        <ion-note color="danger" *ngIf="fieldErrors().email" class="field-error">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors().email }}
+        </ion-note>
 
-        <ion-item>
+        <!-- Password -->
+        <ion-item
+          [class.ion-invalid]="fieldErrors().password"
+          [class.ion-touched]="fieldErrors().password">
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
           <ion-input
             label="Contraseña"
             labelPlacement="floating"
-            type="password"
+            [type]="showPassword() ? 'text' : 'password'"
             [(ngModel)]="userData.password"
             name="password"
             required
+            [disabled]="loading()"
+            placeholder="Mínimo 8 caracteres"
+            autocomplete="new-password"
           ></ion-input>
+          <ion-button
+            slot="end"
+            fill="clear"
+            (click)="togglePasswordVisibility()"
+            [disabled]="loading()"
+            class="password-toggle">
+            <ion-icon
+              [name]="showPassword() ? 'eye-off-outline' : 'eye-outline'"
+              slot="icon-only">
+            </ion-icon>
+          </ion-button>
         </ion-item>
+        <ion-note color="danger" *ngIf="fieldErrors().password" class="field-error">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors().password }}
+        </ion-note>
 
-        <ion-item>
+        <!-- Password Strength Indicator -->
+        <div class="password-strength" *ngIf="userData.password && passwordStrength().score > 0">
+          <div class="strength-header">
+            <ion-text [color]="passwordStrength().color">
+              <small>
+                <ion-icon name="shield-checkmark-outline"></ion-icon>
+                Seguridad: {{ passwordStrength().label }}
+              </small>
+            </ion-text>
+          </div>
+          <ion-progress-bar
+            [value]="passwordStrength().score / 100"
+            [color]="passwordStrength().color">
+          </ion-progress-bar>
+          <div class="strength-suggestions" *ngIf="passwordStrength().suggestions.length > 0">
+            <ion-text color="medium">
+              <small>Incluya: {{ passwordStrength().suggestions.join(', ') }}</small>
+            </ion-text>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <ion-item
+          [class.ion-invalid]="fieldErrors().confirmPassword"
+          [class.ion-touched]="fieldErrors().confirmPassword">
+          <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
           <ion-input
             label="Confirmar contraseña"
             labelPlacement="floating"
-            type="password"
+            [type]="showConfirmPassword() ? 'text' : 'password'"
             [(ngModel)]="userData.confirmPassword"
             name="confirmPassword"
             required
+            [disabled]="loading()"
+            placeholder="Repita su contraseña"
+            autocomplete="new-password"
+          ></ion-input>
+          <ion-button
+            slot="end"
+            fill="clear"
+            (click)="toggleConfirmPasswordVisibility()"
+            [disabled]="loading()"
+            class="password-toggle">
+            <ion-icon
+              [name]="showConfirmPassword() ? 'eye-off-outline' : 'eye-outline'"
+              slot="icon-only">
+            </ion-icon>
+          </ion-button>
+        </ion-item>
+        <ion-note color="danger" *ngIf="fieldErrors().confirmPassword" class="field-error">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors().confirmPassword }}
+        </ion-note>
+        <ion-note color="success" *ngIf="userData.password && userData.confirmPassword && userData.password === userData.confirmPassword" class="field-success">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          Las contraseñas coinciden
+        </ion-note>
+
+        <!-- Business Information Section -->
+        <div class="section-header">
+          <ion-icon name="business-outline"></ion-icon>
+          <ion-text color="medium">
+            <h3>Información de la Empresa</h3>
+          </ion-text>
+        </div>
+
+        <!-- RUC -->
+        <ion-item
+          [class.ion-invalid]="fieldErrors().ruc"
+          [class.ion-touched]="fieldErrors().ruc">
+          <ion-icon name="business-outline" slot="start"></ion-icon>
+          <ion-input
+            label="RUC"
+            labelPlacement="floating"
+            type="text"
+            [(ngModel)]="userData.ruc"
+            (ionInput)="onRucInput($event)"
+            name="ruc"
+            required
+            [disabled]="loading()"
+            placeholder="80012345-1"
+            maxlength="10"
+            inputmode="numeric"
           ></ion-input>
         </ion-item>
+        <ion-note color="danger" *ngIf="fieldErrors().ruc" class="field-error">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors().ruc }}
+        </ion-note>
+        <ion-note color="medium" *ngIf="!fieldErrors().ruc" class="field-help">
+          Formato: ######-# o ########-#
+        </ion-note>
 
-        <ion-button expand="block" type="submit" class="register-button">
-          <ion-icon name="person-add-outline" slot="start"></ion-icon>
-          Crear Cuenta
+        <!-- Razón Social -->
+        <ion-item
+          [class.ion-invalid]="fieldErrors().razonSocial"
+          [class.ion-touched]="fieldErrors().razonSocial">
+          <ion-icon name="business-outline" slot="start"></ion-icon>
+          <ion-input
+            label="Razón Social"
+            labelPlacement="floating"
+            type="text"
+            [(ngModel)]="userData.razonSocial"
+            name="razonSocial"
+            required
+            [disabled]="loading()"
+            placeholder="Mi Empresa S.A."
+            autocomplete="organization"
+          ></ion-input>
+        </ion-item>
+        <ion-note color="danger" *ngIf="fieldErrors().razonSocial" class="field-error">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors().razonSocial }}
+        </ion-note>
+
+        <!-- Timbrado Information Section -->
+        <div class="section-header">
+          <ion-icon name="document-text-outline"></ion-icon>
+          <ion-text color="medium">
+            <h3>Información de Timbrado</h3>
+          </ion-text>
+        </div>
+
+        <!-- Timbrado Number -->
+        <ion-item
+          [class.ion-invalid]="fieldErrors().timbrado"
+          [class.ion-touched]="fieldErrors().timbrado">
+          <ion-icon name="document-text-outline" slot="start"></ion-icon>
+          <ion-input
+            label="Número de Timbrado"
+            labelPlacement="floating"
+            type="text"
+            [(ngModel)]="userData.timbrado"
+            name="timbrado"
+            required
+            [disabled]="loading()"
+            placeholder="12345678"
+            inputmode="numeric"
+          ></ion-input>
+        </ion-item>
+        <ion-note color="danger" *ngIf="fieldErrors().timbrado" class="field-error">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors().timbrado }}
+        </ion-note>
+
+        <!-- Timbrado Expiration Date -->
+        <ion-item
+          [class.ion-invalid]="fieldErrors().timbradoVence"
+          [class.ion-touched]="fieldErrors().timbradoVence">
+          <ion-icon name="calendar-outline" slot="start"></ion-icon>
+          <ion-input
+            label="Vencimiento del Timbrado"
+            labelPlacement="floating"
+            type="date"
+            [(ngModel)]="userData.timbradoVence"
+            name="timbradoVence"
+            required
+            [disabled]="loading()"
+          ></ion-input>
+        </ion-item>
+        <ion-note color="danger" *ngIf="fieldErrors().timbradoVence" class="field-error">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ fieldErrors().timbradoVence }}
+        </ion-note>
+
+        <!-- Terms and Conditions -->
+        <div class="terms-section">
+          <ion-item lines="none" class="terms-item">
+            <ion-checkbox
+              [(ngModel)]="acceptTerms"
+              name="acceptTerms"
+              (ionChange)="toggleTermsAcceptance()"
+              [disabled]="loading()"
+              slot="start">
+            </ion-checkbox>
+            <ion-label class="ion-text-wrap">
+              Acepto los
+              <a href="#" (click)="$event.preventDefault()">términos y condiciones</a>
+              y la
+              <a href="#" (click)="$event.preventDefault()">política de privacidad</a>
+            </ion-label>
+          </ion-item>
+        </div>
+
+        <!-- General Error Message -->
+        <ion-text color="danger" *ngIf="errorMessage()">
+          <div class="error-message">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <p>{{ errorMessage() }}</p>
+          </div>
+        </ion-text>
+
+        <!-- Submit Button -->
+        <ion-button
+          expand="block"
+          type="submit"
+          [disabled]="loading()"
+          class="register-button"
+        >
+          <ion-spinner *ngIf="loading()" name="crescent"></ion-spinner>
+          <span *ngIf="!loading()">
+            <ion-icon name="person-add-outline" slot="start"></ion-icon>
+            Crear Cuenta
+          </span>
         </ion-button>
+
+        <!-- Login Link -->
+        <div class="login-link">
+          <ion-text color="medium">
+            ¿Ya tienes cuenta?
+          </ion-text>
+          <ion-button fill="clear" (click)="goToLogin()">
+            Iniciar Sesión
+          </ion-button>
+        </div>
       </form>
     </ion-card-content>
   </ion-card>

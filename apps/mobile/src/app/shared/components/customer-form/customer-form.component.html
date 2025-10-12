@@ -1,0 +1,233 @@
+<form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
+  <ion-list>
+    <!-- Customer Type -->
+    <ion-item>
+      <ion-label position="stacked">Tipo de Cliente *</ion-label>
+      <ion-select formControlName="customerType" interface="action-sheet">
+        <ion-select-option [value]="CustomerType.INDIVIDUAL">Individual</ion-select-option>
+        <ion-select-option [value]="CustomerType.BUSINESS">Empresa</ion-select-option>
+      </ion-select>
+    </ion-item>
+    @if (isFieldInvalid('customerType')) {
+      <ion-note color="danger" class="error-message">
+        {{ getErrorMessage('customerType') }}
+      </ion-note>
+    }
+
+    <!-- Name -->
+    <ion-item>
+      <ion-label position="stacked">Nombre / Razón Social *</ion-label>
+      <ion-input
+        formControlName="name"
+        type="text"
+        placeholder="Ingrese el nombre"
+        autocapitalize="words"
+      ></ion-input>
+    </ion-item>
+    @if (isFieldInvalid('name')) {
+      <ion-note color="danger" class="error-message">
+        {{ getErrorMessage('name') }}
+      </ion-note>
+    }
+
+    <!-- Document Type -->
+    <ion-item>
+      <ion-label position="stacked">Tipo de Documento *</ion-label>
+      <ion-select formControlName="documentType" interface="action-sheet">
+        @for (docType of documentTypes; track docType.value) {
+          <ion-select-option [value]="docType.value">{{ docType.label }}</ion-select-option>
+        }
+      </ion-select>
+    </ion-item>
+
+    <!-- Document ID with Scan Button -->
+    <ion-item>
+      <ion-label position="stacked">Número de Documento *</ion-label>
+      <ion-input
+        formControlName="documentId"
+        type="text"
+        placeholder="Ingrese el número de documento"
+      ></ion-input>
+      @if (isScanningAvailable()) {
+        <ion-button
+          fill="clear"
+          size="small"
+          slot="end"
+          (click)="scanDocument()"
+          [disabled]="scanning()"
+        >
+          @if (scanning()) {
+            <ion-spinner name="crescent"></ion-spinner>
+          } @else {
+            <ion-icon slot="icon-only" name="scanOutline" color="primary"></ion-icon>
+          }
+        </ion-button>
+      }
+    </ion-item>
+    @if (isFieldInvalid('documentId')) {
+      <ion-note color="danger" class="error-message">
+        {{ getErrorMessage('documentId') }}
+      </ion-note>
+    }
+    @if (!isFieldInvalid('documentId') && isScanningAvailable()) {
+      <ion-note color="medium" class="hint-message">
+        Toque el ícono de escaneo para capturar el documento con la cámara
+      </ion-note>
+    }
+
+    <!-- Tax ID (RUC) - Required for businesses -->
+    <ion-item>
+      <ion-label position="stacked">
+        RUC @if (isBusinessType()) {*}
+      </ion-label>
+      <ion-input
+        formControlName="taxId"
+        type="text"
+        placeholder="XXXXXXXX-X"
+        maxlength="10"
+        (ionBlur)="onRUCBlur()"
+      ></ion-input>
+    </ion-item>
+    @if (isFieldInvalid('taxId')) {
+      <ion-note color="danger" class="error-message">
+        {{ getErrorMessage('taxId') }}
+      </ion-note>
+    }
+    @if (!isFieldInvalid('taxId')) {
+      <ion-note color="medium" class="hint-message">
+        Formato: 8 dígitos + guión + dígito verificador (ej: 12345678-9)
+      </ion-note>
+    }
+
+    <!-- Email -->
+    <ion-item>
+      <ion-label position="stacked">Email</ion-label>
+      <ion-input
+        formControlName="email"
+        type="email"
+        placeholder="correo@ejemplo.com"
+        autocomplete="email"
+      ></ion-input>
+    </ion-item>
+    @if (isFieldInvalid('email')) {
+      <ion-note color="danger" class="error-message">
+        {{ getErrorMessage('email') }}
+      </ion-note>
+    }
+
+    <!-- Phone -->
+    <ion-item>
+      <ion-label position="stacked">Teléfono</ion-label>
+      <ion-input
+        formControlName="phone"
+        type="tel"
+        placeholder="+595 XXX XXX XXX"
+        autocomplete="tel"
+      ></ion-input>
+    </ion-item>
+    @if (isFieldInvalid('phone')) {
+      <ion-note color="danger" class="error-message">
+        {{ getErrorMessage('phone') }}
+      </ion-note>
+    }
+
+    <!-- Address -->
+    <ion-item>
+      <ion-label position="stacked">Dirección</ion-label>
+      <ion-input
+        formControlName="address"
+        type="text"
+        placeholder="Calle, número, barrio"
+      ></ion-input>
+    </ion-item>
+
+    <!-- City -->
+    <ion-item>
+      <ion-label position="stacked">Ciudad</ion-label>
+      <ion-input
+        formControlName="city"
+        type="text"
+        placeholder="Asunción, Ciudad del Este, etc."
+        autocapitalize="words"
+      ></ion-input>
+    </ion-item>
+
+    <!-- Country -->
+    <ion-item>
+      <ion-label position="stacked">País</ion-label>
+      <ion-input
+        formControlName="country"
+        type="text"
+        placeholder="Paraguay"
+        autocapitalize="words"
+      ></ion-input>
+    </ion-item>
+
+    <!-- Credit Limit -->
+    <ion-item>
+      <ion-label position="stacked">Límite de Crédito (₲)</ion-label>
+      <ion-input
+        formControlName="creditLimit"
+        type="number"
+        placeholder="0"
+        min="0"
+      ></ion-input>
+    </ion-item>
+    @if (isFieldInvalid('creditLimit')) {
+      <ion-note color="danger" class="error-message">
+        {{ getErrorMessage('creditLimit') }}
+      </ion-note>
+    }
+
+    <!-- Notes -->
+    <ion-item>
+      <ion-label position="stacked">Notas</ion-label>
+      <ion-textarea
+        formControlName="notes"
+        placeholder="Información adicional sobre el cliente"
+        rows="3"
+        maxlength="500"
+      ></ion-textarea>
+    </ion-item>
+    <ion-note color="medium" class="hint-message character-count">
+      {{ customerForm.get('notes')?.value?.length || 0 }} / 500
+    </ion-note>
+
+    <!-- Active Status -->
+    @if (customer) {
+      <ion-item>
+        <ion-label>Cliente Activo</ion-label>
+        <ion-toggle formControlName="isActive" slot="end"></ion-toggle>
+      </ion-item>
+    }
+  </ion-list>
+
+  <!-- Form Actions -->
+  <div class="form-actions">
+    <ion-button
+      expand="block"
+      type="button"
+      fill="outline"
+      color="medium"
+      (click)="onCancel()"
+      [disabled]="loading()"
+    >
+      <ion-icon slot="start" name="closeOutline"></ion-icon>
+      Cancelar
+    </ion-button>
+
+    <ion-button
+      expand="block"
+      type="submit"
+      color="primary"
+      [disabled]="customerForm.invalid || loading()"
+    >
+      @if (loading()) {
+        <ion-spinner name="crescent"></ion-spinner>
+      } @else {
+        <ion-icon slot="start" name="saveOutline"></ion-icon>
+        {{ submitLabel }}
+      }
+    </ion-button>
+  </div>
+</form>

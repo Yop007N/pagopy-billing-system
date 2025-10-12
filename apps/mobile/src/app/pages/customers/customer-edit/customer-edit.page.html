@@ -1,0 +1,41 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-back-button [defaultHref]="'/customers/' + customerId"></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      Editar Cliente
+      @if (!isOnline()) {
+        <ion-badge color="warning" class="offline-badge">
+          <ion-icon name="cloudOfflineOutline"></ion-icon>
+          Modo sin conexión
+        </ion-badge>
+      }
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  @if (loading()) {
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando información del cliente...</p>
+    </div>
+  }
+
+  @if (!loading() && customer()) {
+    @if (!isOnline()) {
+      <div class="offline-banner">
+        <ion-icon name="cloudOfflineOutline"></ion-icon>
+        <p>Está trabajando sin conexión. Los cambios se guardarán localmente y se sincronizarán automáticamente cuando vuelva a estar en línea.</p>
+      </div>
+    }
+
+    <app-customer-form
+      [customer]="customer()!"
+      submitLabel="Actualizar Cliente"
+      (formSubmit)="onFormSubmit($event)"
+      (formCancel)="onFormCancel()"
+    ></app-customer-form>
+  }
+</ion-content>

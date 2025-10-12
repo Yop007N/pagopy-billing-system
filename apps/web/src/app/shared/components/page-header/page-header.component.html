@@ -1,0 +1,46 @@
+<div class="page-header">
+  <!-- Breadcrumbs -->
+  <nav *ngIf="breadcrumbs.length > 0" class="breadcrumbs" aria-label="breadcrumb">
+    <ol class="breadcrumb-list">
+      <li *ngFor="let crumb of breadcrumbs; let last = last" class="breadcrumb-item">
+        <mat-icon *ngIf="crumb.icon" class="breadcrumb-icon">{{ crumb.icon }}</mat-icon>
+        <a
+          *ngIf="crumb.route && !last"
+          [routerLink]="crumb.route"
+          class="breadcrumb-link">
+          {{ crumb.label }}
+        </a>
+        <span *ngIf="!crumb.route || last" class="breadcrumb-current">
+          {{ crumb.label }}
+        </span>
+        <mat-icon *ngIf="!last" class="breadcrumb-separator">chevron_right</mat-icon>
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Header Content -->
+  <div class="header-content">
+    <div class="header-main">
+      <!-- Back Button -->
+      <button
+        *ngIf="showBackButton"
+        class="back-button"
+        [routerLink]="backRoute"
+        (click)="!backRoute && onBackClick()"
+        aria-label="Volver">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+
+      <!-- Title and Subtitle -->
+      <div class="header-text">
+        <h1 class="page-title">{{ title }}</h1>
+        <p *ngIf="subtitle" class="page-subtitle">{{ subtitle }}</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div *ngIf="actionsTemplate" class="header-actions">
+      <ng-container *ngTemplateOutlet="actionsTemplate"></ng-container>
+    </div>
+  </div>
+</div>

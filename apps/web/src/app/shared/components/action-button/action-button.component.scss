@@ -1,0 +1,144 @@
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.3);
+  }
+
+  &.full-width {
+    width: 100%;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .button-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .button-icon {
+    font-size: inherit;
+    width: auto;
+    height: auto;
+  }
+
+  .button-spinner {
+    ::ng-deep circle {
+      stroke: currentColor;
+    }
+  }
+
+  // Size variants
+  &.size-small {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    min-height: 32px;
+
+    .button-icon {
+      font-size: 18px;
+    }
+  }
+
+  &.size-medium {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    min-height: 40px;
+
+    .button-icon {
+      font-size: 20px;
+    }
+  }
+
+  &.size-large {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.125rem;
+    min-height: 48px;
+
+    .button-icon {
+      font-size: 24px;
+    }
+  }
+
+  // Primary variant
+  &.variant-primary {
+    background-color: #1976d2;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #1565c0;
+    }
+
+    &:active:not(:disabled) {
+      background-color: #0d47a1;
+    }
+  }
+
+  // Secondary variant
+  &.variant-secondary {
+    background-color: #f5f5f5;
+    color: rgba(0, 0, 0, 0.87);
+
+    &:hover:not(:disabled) {
+      background-color: #eeeeee;
+    }
+
+    &:active:not(:disabled) {
+      background-color: #e0e0e0;
+    }
+  }
+
+  // Danger variant
+  &.variant-danger {
+    background-color: #d32f2f;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #c62828;
+    }
+
+    &:active:not(:disabled) {
+      background-color: #b71c1c;
+    }
+  }
+
+  // Success variant
+  &.variant-success {
+    background-color: #388e3c;
+    color: white;
+
+    &:hover:not(:disabled) {
+      background-color: #2e7d32;
+    }
+
+    &:active:not(:disabled) {
+      background-color: #1b5e20;
+    }
+  }
+
+  // Text variant
+  &.variant-text {
+    background-color: transparent;
+    color: #1976d2;
+
+    &:hover:not(:disabled) {
+      background-color: rgba(25, 118, 210, 0.08);
+    }
+
+    &:active:not(:disabled) {
+      background-color: rgba(25, 118, 210, 0.16);
+    }
+  }
+}

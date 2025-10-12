@@ -27,12 +27,14 @@ export interface User {
 export interface CreateUserDto {
   email: string;
   password: string;
+  firstName: string;
+  lastName: string;
   ruc: string;
   razonSocial: string;
   direccion?: string;
   telefono?: string;
   timbrado: string;
-  timbradoVence: Date;
+  timbradoVence: Date | string;
 }
 
 export interface UpdateUserDto {

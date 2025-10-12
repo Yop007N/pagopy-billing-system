@@ -4,141 +4,450 @@
       <ion-back-button defaultHref="/tabs/sales"></ion-back-button>
     </ion-buttons>
     <ion-title>Nueva Venta</ion-title>
+    <ion-buttons slot="end">
+      @if (!isOnline()) {
+        <ion-chip color="warning">
+          <ion-icon name="cloud-offline-outline"></ion-icon>
+          <ion-label>Offline</ion-label>
+        </ion-chip>
+      }
+      @if (syncStatus().pendingItems > 0) {
+        <ion-chip color="warning">
+          <ion-icon name="sync-outline"></ion-icon>
+          <ion-label>{{ syncStatus().pendingItems }}</ion-label>
+        </ion-chip>
+      }
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true" class="ion-padding">
-  <!-- Customer Info -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Datos del Cliente</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <ion-item>
-        <ion-input
-          label="Nombre del Cliente"
-          labelPlacement="floating"
-          [(ngModel)]="sale.customerName"
-          required
-        ></ion-input>
-      </ion-item>
+  <form [formGroup]="saleForm" (ngSubmit)="onSubmit()">
 
-      <ion-item>
-        <ion-input
-          label="RUC (Opcional)"
-          labelPlacement="floating"
-          [(ngModel)]="sale.customerRuc"
-          type="text"
-        ></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <ion-select
-          label="Método de Pago"
-          labelPlacement="floating"
-          [(ngModel)]="sale.paymentMethod"
-        >
-          <ion-select-option value="cash">Efectivo</ion-select-option>
-          <ion-select-option value="card">Tarjeta</ion-select-option>
-          <ion-select-option value="transfer">Transferencia</ion-select-option>
-          <ion-select-option value="credit">Crédito</ion-select-option>
-        </ion-select>
-      </ion-item>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Items -->
-  <ion-card>
-    <ion-card-header>
-      <ion-card-title>Productos/Servicios</ion-card-title>
-    </ion-card-header>
-    <ion-card-content>
-      <div *ngFor="let item of items; let i = index" class="item-row">
-        <ion-item>
-          <ion-input
-            label="Descripción"
-            labelPlacement="floating"
-            [(ngModel)]="item.description"
-            required
-          ></ion-input>
-        </ion-item>
-
-        <div class="item-details">
-          <ion-item class="item-field">
-            <ion-input
-              label="Cant."
-              labelPlacement="floating"
-              type="number"
-              [(ngModel)]="item.quantity"
-              (ngModelChange)="updateItemTotal(item)"
-              min="1"
-            ></ion-input>
+    <!-- Customer Information Card -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Informacion del Cliente</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list [inset]="false">
+          <!-- Customer Type -->
+          <ion-item>
+            <ion-select
+              label="Tipo de Cliente"
+              labelPlacement="stacked"
+              formControlName="customerType"
+              interface="popover"
+            >
+              <ion-select-option [value]="CustomerType.CONSUMER">
+                {{ getCustomerTypeLabel(CustomerType.CONSUMER) }}
+              </ion-select-option>
+              <ion-select-option [value]="CustomerType.BUSINESS">
+                {{ getCustomerTypeLabel(CustomerType.BUSINESS) }}
+              </ion-select-option>
+            </ion-select>
           </ion-item>
 
-          <ion-item class="item-field">
+          <!-- Customer Name -->
+          <ion-item>
             <ion-input
-              label="Precio"
-              labelPlacement="floating"
-              type="number"
-              [(ngModel)]="item.price"
-              (ngModelChange)="updateItemTotal(item)"
-              min="0"
+              label="Nombre/Razon Social"
+              labelPlacement="stacked"
+              formControlName="customerName"
+              placeholder="Ingrese nombre del cliente"
+              type="text"
+              [class.ion-invalid]="saleForm.get('customerName')?.invalid && saleForm.get('customerName')?.touched"
+              [class.ion-valid]="saleForm.get('customerName')?.valid && saleForm.get('customerName')?.touched"
             ></ion-input>
+            @if (saleForm.get('customerName')?.hasError('required') && saleForm.get('customerName')?.touched) {
+              <ion-note slot="error">Campo requerido</ion-note>
+            }
           </ion-item>
 
-          <div class="item-total">
-            <span class="total-label">Total:</span>
-            <span class="total-value">{{ item.total | number:'1.0-0' }} Gs.</span>
+          <!-- Customer Search Button -->
+          <ion-button
+            expand="block"
+            fill="outline"
+            size="small"
+            (click)="openCustomerSearch()"
+            class="customer-search-btn"
+          >
+            <ion-icon name="person-outline" slot="start"></ion-icon>
+            Buscar Cliente
+          </ion-button>
+
+          <!-- Customer RUC -->
+          <ion-item>
+            <ion-input
+              label="RUC (opcional)"
+              labelPlacement="stacked"
+              formControlName="customerRuc"
+              placeholder="######-#"
+              type="text"
+              [class.ion-invalid]="saleForm.get('customerRuc')?.invalid && saleForm.get('customerRuc')?.touched"
+              [class.ion-valid]="saleForm.get('customerRuc')?.valid && saleForm.get('customerRuc')?.value"
+            ></ion-input>
+            @if (saleForm.get('customerRuc')?.hasError('pattern') && saleForm.get('customerRuc')?.touched) {
+              <ion-note slot="error">Formato invalido (######-#)</ion-note>
+            }
+          </ion-item>
+
+          <!-- Customer Email -->
+          <ion-item>
+            <ion-input
+              label="Email (opcional)"
+              labelPlacement="stacked"
+              formControlName="customerEmail"
+              placeholder="cliente@email.com"
+              type="email"
+              [class.ion-invalid]="saleForm.get('customerEmail')?.invalid && saleForm.get('customerEmail')?.touched"
+              [class.ion-valid]="saleForm.get('customerEmail')?.valid && saleForm.get('customerEmail')?.value"
+            ></ion-input>
+            @if (saleForm.get('customerEmail')?.hasError('email') && saleForm.get('customerEmail')?.touched) {
+              <ion-note slot="error">Email invalido</ion-note>
+            }
+          </ion-item>
+
+          <!-- Customer Phone -->
+          <ion-item>
+            <ion-input
+              label="Telefono (opcional)"
+              labelPlacement="stacked"
+              formControlName="customerPhone"
+              placeholder="0981 123 456"
+              type="tel"
+            ></ion-input>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Payment Method Card -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Metodo de Pago</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-list [inset]="false">
+          <ion-item>
+            <ion-select
+              label="Seleccione metodo de pago"
+              labelPlacement="stacked"
+              formControlName="paymentMethod"
+              interface="action-sheet"
+            >
+              <ion-select-option [value]="PaymentMethod.CASH">
+                <ion-icon name="cash-outline"></ion-icon>
+                {{ getPaymentMethodLabel(PaymentMethod.CASH) }}
+              </ion-select-option>
+              <ion-select-option [value]="PaymentMethod.TRANSFER">
+                <ion-icon name="swap-horizontal-outline"></ion-icon>
+                {{ getPaymentMethodLabel(PaymentMethod.TRANSFER) }}
+              </ion-select-option>
+              <ion-select-option [value]="PaymentMethod.CARD">
+                <ion-icon name="card-outline"></ion-icon>
+                {{ getPaymentMethodLabel(PaymentMethod.CARD) }}
+              </ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-list>
+
+        <div class="info-box">
+          <ion-icon name="information-circle-outline" class="info-icon"></ion-icon>
+          <div class="info-content">
+            <p class="info-title">Informacion:</p>
+            <ul class="info-list">
+              @if (isOnline()) {
+                <li>La venta se registrara inmediatamente</li>
+                <li>Se puede generar factura electronica</li>
+                <li>Envio automatico por WhatsApp/Email</li>
+              } @else {
+                <li>Modo offline: La venta se guardara localmente</li>
+                <li>Se sincronizara automaticamente al restaurar conexion</li>
+                <li>Puede seguir registrando ventas sin internet</li>
+              }
+            </ul>
           </div>
         </div>
+      </ion-card-content>
+    </ion-card>
 
+    <!-- Items Section -->
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Items de la Venta</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div formArrayName="items">
+          @for (item of items.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="item-container">
+              <ion-list [inset]="false">
+                <!-- Concept with Barcode Scanner -->
+                <ion-item>
+                  <ion-input
+                    label="Concepto"
+                    labelPlacement="stacked"
+                    formControlName="concept"
+                    placeholder="Descripcion del producto/servicio"
+                    type="text"
+                    [class.ion-invalid]="item.get('concept')?.invalid && item.get('concept')?.touched"
+                    [class.ion-valid]="item.get('concept')?.valid && item.get('concept')?.touched"
+                  ></ion-input>
+                  <ion-button
+                    slot="end"
+                    fill="clear"
+                    color="primary"
+                    (click)="scanBarcode(i)"
+                    [disabled]="scanningBarcode()"
+                  >
+                    <ion-icon name="barcode-outline" slot="icon-only"></ion-icon>
+                  </ion-button>
+                  @if (item.get('concept')?.hasError('required') && item.get('concept')?.touched) {
+                    <ion-note slot="error">Campo requerido</ion-note>
+                  }
+                </ion-item>
+
+                <!-- Product Search Button -->
+                <ion-button
+                  expand="block"
+                  fill="outline"
+                  size="small"
+                  (click)="openProductSearch(i)"
+                  class="product-search-btn"
+                >
+                  <ion-icon name="search-outline" slot="start"></ion-icon>
+                  Buscar Producto
+                </ion-button>
+
+                <!-- Quantity, Amount, IVA in a row -->
+                <div class="item-row">
+                  <ion-item class="item-field">
+                    <ion-input
+                      label="Cantidad"
+                      labelPlacement="stacked"
+                      formControlName="quantity"
+                      type="number"
+                      min="1"
+                      [class.ion-invalid]="item.get('quantity')?.invalid && item.get('quantity')?.touched"
+                    ></ion-input>
+                  </ion-item>
+
+                  <ion-item class="item-field">
+                    <ion-input
+                      label="Precio Unit."
+                      labelPlacement="stacked"
+                      formControlName="amount"
+                      type="number"
+                      min="0"
+                      [class.ion-invalid]="item.get('amount')?.invalid && item.get('amount')?.touched"
+                    ></ion-input>
+                  </ion-item>
+
+                  <ion-item class="item-field-small">
+                    <ion-select
+                      label="IVA"
+                      labelPlacement="stacked"
+                      formControlName="iva"
+                      interface="popover"
+                    >
+                      <ion-select-option [value]="10">10%</ion-select-option>
+                      <ion-select-option [value]="5">5%</ion-select-option>
+                      <ion-select-option [value]="0">Exento</ion-select-option>
+                    </ion-select>
+                  </ion-item>
+                </div>
+
+                <!-- Subtotal Display -->
+                <ion-item lines="none" class="subtotal-item">
+                  <ion-label slot="start" class="subtotal-label">Subtotal:</ion-label>
+                  <ion-label slot="end" class="subtotal-value">
+                    {{ item.get('subtotal')?.value | number:'1.0-0' }} Gs
+                  </ion-label>
+                </ion-item>
+              </ion-list>
+
+              <!-- Remove Item Button -->
+              @if (items.length > 1) {
+                <ion-button
+                  fill="clear"
+                  color="danger"
+                  size="small"
+                  (click)="removeItem(i)"
+                  class="remove-item-btn"
+                >
+                  <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+                </ion-button>
+              }
+
+              <div class="item-divider"></div>
+            </div>
+          }
+        </div>
+
+        <!-- Add Item Button -->
         <ion-button
-          *ngIf="items.length > 1"
-          fill="clear"
-          color="danger"
-          (click)="removeItem(i)"
-          class="remove-btn"
+          expand="block"
+          fill="outline"
+          (click)="addItem()"
+          class="add-item-btn"
         >
-          <ion-icon name="trash-outline"></ion-icon>
+          <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+          Agregar Item
         </ion-button>
-      </div>
 
-      <ion-button expand="block" fill="outline" (click)="addItem()">
-        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
-        Agregar Producto
+        <!-- Totals Section -->
+        <div class="totals-section">
+          <div class="totals-divider"></div>
+
+          <div class="totals-breakdown">
+            <div class="total-row">
+              <span class="total-label">Gravado 10%:</span>
+              <span class="total-value">{{ totals().subtotalGravado10 | number:'1.0-0' }} Gs</span>
+            </div>
+            <div class="total-row">
+              <span class="total-label">IVA 10%:</span>
+              <span class="total-value">{{ totals().iva10 | number:'1.0-0' }} Gs</span>
+            </div>
+            <div class="total-row">
+              <span class="total-label">Gravado 5%:</span>
+              <span class="total-value">{{ totals().subtotalGravado5 | number:'1.0-0' }} Gs</span>
+            </div>
+            <div class="total-row">
+              <span class="total-label">IVA 5%:</span>
+              <span class="total-value">{{ totals().iva5 | number:'1.0-0' }} Gs</span>
+            </div>
+            <div class="total-row">
+              <span class="total-label">Exento:</span>
+              <span class="total-value">{{ totals().exento | number:'1.0-0' }} Gs</span>
+            </div>
+          </div>
+
+          <div class="totals-divider"></div>
+
+          <div class="total-final">
+            <span class="total-final-label">Total a Pagar:</span>
+            <span class="total-final-value">{{ totals().total | number:'1.0-0' }} Gs</span>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Submit Button -->
+    <div class="submit-section">
+      <ion-button
+        expand="block"
+        size="large"
+        type="submit"
+        [disabled]="saleForm.invalid || loading()"
+        color="primary"
+      >
+        @if (loading()) {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else {
+          <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+          Guardar Venta
+        }
       </ion-button>
-    </ion-card-content>
-  </ion-card>
+    </div>
 
-  <!-- Notes -->
-  <ion-card>
-    <ion-card-content>
-      <ion-item>
-        <ion-textarea
-          label="Notas (Opcional)"
-          labelPlacement="floating"
-          [(ngModel)]="sale.notes"
-          rows="3"
-        ></ion-textarea>
-      </ion-item>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Total -->
-  <ion-card class="total-card">
-    <ion-card-content>
-      <div class="total-section">
-        <span class="total-label">Total a Pagar:</span>
-        <span class="total-amount">{{ getTotal() | number:'1.0-0' }} Gs.</span>
-      </div>
-    </ion-card-content>
-  </ion-card>
-
-  <!-- Actions -->
-  <div class="action-buttons">
-    <ion-button expand="block" size="large" (click)="saveSale()">
-      <ion-icon name="save-outline" slot="start"></ion-icon>
-      Guardar Venta
-    </ion-button>
-  </div>
+  </form>
 </ion-content>
+
+<!-- Customer Search Modal -->
+<ion-modal [isOpen]="showCustomerModal()" (didDismiss)="closeCustomerModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Buscar Cliente</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeCustomerModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar
+          placeholder="Buscar por nombre, RUC..."
+          (ionInput)="searchCustomers($event)"
+          [debounce]="300"
+        ></ion-searchbar>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      @if (isSearchingCustomers()) {
+        <div class="loading-container">
+          <ion-spinner></ion-spinner>
+          <p>Buscando clientes...</p>
+        </div>
+      } @else if (customerSearchResults().length > 0) {
+        <ion-list>
+          @for (customer of customerSearchResults(); track customer.id) {
+            <ion-item button (click)="selectCustomer(customer)">
+              <ion-label>
+                <h2>{{ customer.name }}</h2>
+                @if (customer.taxId || customer.documentId) {
+                  <p>{{ customer.taxId || customer.documentId }}</p>
+                }
+                @if (customer.email) {
+                  <p>{{ customer.email }}</p>
+                }
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      } @else {
+        <div class="empty-state">
+          <ion-icon name="search-outline" size="large"></ion-icon>
+          <p>Busque clientes por nombre o RUC</p>
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Product Search Modal -->
+<ion-modal [isOpen]="showProductModal()" (didDismiss)="closeProductModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Buscar Producto</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeProductModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar
+          placeholder="Buscar por nombre, código..."
+          (ionInput)="searchProducts($event)"
+          [debounce]="300"
+        ></ion-searchbar>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      @if (isSearchingProducts()) {
+        <div class="loading-container">
+          <ion-spinner></ion-spinner>
+          <p>Buscando productos...</p>
+        </div>
+      } @else if (productSearchResults().length > 0) {
+        <ion-list>
+          @for (product of productSearchResults(); track product.id) {
+            <ion-item button (click)="selectProduct(product)">
+              <ion-label>
+                <h2>{{ product.name }}</h2>
+                <p>Código: {{ product.code }}</p>
+                <p>Precio: {{ product.price | number:'1.0-0' }} Gs</p>
+                @if (product.stock !== undefined) {
+                  <p>Stock: {{ product.stock }}</p>
+                }
+              </ion-label>
+            </ion-item>
+          }
+        </ion-list>
+      } @else {
+        <div class="empty-state">
+          <ion-icon name="search-outline" size="large"></ion-icon>
+          <p>Busque productos por nombre o código</p>
+        </div>
+      }
+    </ion-content>
+  </ng-template>
+</ion-modal>

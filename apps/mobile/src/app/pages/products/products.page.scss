@@ -1,0 +1,173 @@
+ion-content {
+  --background: var(--ion-background-color, #f5f5f5);
+}
+
+.loading-container,
+.error-container,
+.empty-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  padding: 2rem;
+  text-align: center;
+
+  ion-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  ion-spinner {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: var(--ion-color-medium);
+    margin: 0.5rem 0 1.5rem;
+    font-size: 1rem;
+  }
+
+  h2 {
+    margin: 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+}
+
+.filter-chips {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  ion-chip {
+    margin: 0;
+    cursor: pointer;
+
+    ion-icon {
+      margin-left: 0.25rem;
+      cursor: pointer;
+    }
+  }
+}
+
+ion-list {
+  background: transparent;
+
+  ion-item {
+    --background: var(--ion-card-background, #ffffff);
+    --border-color: var(--ion-border-color, #e0e0e0);
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+
+    &:hover {
+      --background: var(--ion-color-light);
+    }
+  }
+}
+
+ion-label {
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ion-text-color);
+    margin-bottom: 0.25rem;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: var(--ion-color-medium);
+    margin: 0.125rem 0;
+  }
+
+  .product-description {
+    font-size: 0.8rem;
+    font-style: italic;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 90%;
+  }
+}
+
+.product-meta {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+
+  ion-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+.product-price {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--ion-color-primary);
+  text-align: right;
+}
+
+ion-fab {
+  margin: 1rem;
+}
+
+ion-fab-button {
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &:hover {
+    --box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  ion-content {
+    --background: var(--ion-background-color, #1e1e1e);
+  }
+
+  ion-list {
+    ion-item {
+      --background: var(--ion-card-background, #2d2d2d);
+      --border-color: var(--ion-border-color, #3d3d3d);
+    }
+  }
+}
+
+// Responsive adjustments
+@media (min-width: 768px) {
+  ion-list {
+    padding: 0 1rem;
+
+    ion-item {
+      max-width: 1200px;
+      margin: 0.5rem auto;
+    }
+  }
+
+  .filter-chips {
+    padding: 0.5rem 2rem;
+  }
+}
+
+// Animations
+ion-item {
+  animation: fadeInUp 0.3s ease-in-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

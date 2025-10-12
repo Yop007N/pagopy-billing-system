@@ -19,10 +19,7 @@
         "assets": [
           "apps/web/src/favicon.ico",
           "apps/web/src/assets",
-          {
-            "glob": "**/*",
-            "input": "apps/web/public"
-          }
+          "apps/web/src/manifest.webmanifest"
         ],
         "styles": ["apps/web/src/styles.scss"],
         "scripts": []

@@ -1,0 +1,404 @@
+<div class="register-container">
+  <mat-card class="register-card">
+    <!-- Header with Logo/Title -->
+    <mat-card-header class="register-header">
+      <div class="header-content">
+        <mat-icon class="header-icon">how_to_reg</mat-icon>
+        <mat-card-title>Registro de Usuario</mat-card-title>
+        <p class="header-subtitle">Complete todos los campos para crear su cuenta</p>
+      </div>
+    </mat-card-header>
+
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+      <div class="progress-step" [class.active]="true" [class.completed]="isStepValid('credentials')">
+        <div class="step-circle">
+          <mat-icon>{{ isStepValid('credentials') ? 'check' : 'person' }}</mat-icon>
+        </div>
+        <span class="step-label">Credenciales</span>
+      </div>
+      <div class="progress-line" [class.completed]="isStepValid('credentials')"></div>
+      <div class="progress-step" [class.active]="isStepValid('credentials')" [class.completed]="isStepValid('fiscal')">
+        <div class="step-circle">
+          <mat-icon>{{ isStepValid('fiscal') ? 'check' : 'business' }}</mat-icon>
+        </div>
+        <span class="step-label">Datos Fiscales</span>
+      </div>
+      <div class="progress-line" [class.completed]="isStepValid('fiscal')"></div>
+      <div class="progress-step" [class.active]="isStepValid('fiscal')" [class.completed]="isStepValid('timbrado')">
+        <div class="step-circle">
+          <mat-icon>{{ isStepValid('timbrado') ? 'check' : 'receipt_long' }}</mat-icon>
+        </div>
+        <span class="step-label">Timbrado SET</span>
+      </div>
+    </div>
+
+    <mat-card-content>
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+        <!-- SECTION 1: Credenciales -->
+        <div class="form-section" [class.section-valid]="isStepValid('credentials')">
+          <div class="section-header">
+            <mat-icon class="section-icon">lock_person</mat-icon>
+            <h3 class="section-title">Credenciales de Acceso</h3>
+          </div>
+          <div class="section-description">
+            Ingrese sus datos personales y cree una contraseña segura
+          </div>
+
+          <div class="form-grid">
+            <!-- First Name -->
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Nombre</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="firstName"
+                placeholder="Juan"
+                aria-label="Nombre del usuario">
+              <mat-icon matPrefix class="field-icon">person</mat-icon>
+              @if (isFieldValid('firstName')) {
+                <mat-icon matSuffix class="success-icon">check_circle</mat-icon>
+              }
+              <mat-hint>Su nombre tal como aparece en su documento</mat-hint>
+              @if (registerForm.get('firstName')?.hasError('required') && registerForm.get('firstName')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  El nombre es requerido
+                </mat-error>
+              }
+              @if (registerForm.get('firstName')?.hasError('minlength') && registerForm.get('firstName')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  Debe tener al menos 2 caracteres
+                </mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Last Name -->
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Apellido</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="lastName"
+                placeholder="Pérez"
+                aria-label="Apellido del usuario">
+              <mat-icon matPrefix class="field-icon">person</mat-icon>
+              @if (isFieldValid('lastName')) {
+                <mat-icon matSuffix class="success-icon">check_circle</mat-icon>
+              }
+              <mat-hint>Su apellido completo</mat-hint>
+              @if (registerForm.get('lastName')?.hasError('required') && registerForm.get('lastName')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  El apellido es requerido
+                </mat-error>
+              }
+              @if (registerForm.get('lastName')?.hasError('minlength') && registerForm.get('lastName')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  Debe tener al menos 2 caracteres
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <!-- Email -->
+          <mat-form-field appearance="outline" class="form-field full-width">
+            <mat-label>Correo Electrónico</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              placeholder="correo@ejemplo.com"
+              aria-label="Correo electrónico">
+            <mat-icon matPrefix class="field-icon">email</mat-icon>
+            @if (isFieldValid('email')) {
+              <mat-icon matSuffix class="success-icon">check_circle</mat-icon>
+            }
+            <mat-hint>Usaremos este correo para notificaciones importantes</mat-hint>
+            @if (registerForm.get('email')?.hasError('required') && registerForm.get('email')?.touched) {
+              <mat-error>
+                <mat-icon class="error-icon">error</mat-icon>
+                El correo electrónico es requerido
+              </mat-error>
+            }
+            @if (registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched) {
+              <mat-error>
+                <mat-icon class="error-icon">error</mat-icon>
+                Ingrese un correo electrónico válido
+              </mat-error>
+            }
+          </mat-form-field>
+
+          <div class="form-grid">
+            <!-- Password -->
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Contraseña</mat-label>
+              <input
+                matInput
+                [type]="hidePassword() ? 'password' : 'text'"
+                formControlName="password"
+                aria-label="Contraseña">
+              <mat-icon matPrefix class="field-icon">lock</mat-icon>
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+                <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <mat-hint>Mínimo 8 caracteres</mat-hint>
+              @if (registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  La contraseña es requerida
+                </mat-error>
+              }
+              @if (registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  Debe tener al menos 8 caracteres
+                </mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Confirm Password -->
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Confirmar Contraseña</mat-label>
+              <input
+                matInput
+                [type]="hideConfirmPassword() ? 'password' : 'text'"
+                formControlName="confirmPassword"
+                aria-label="Confirmar contraseña">
+              <mat-icon matPrefix class="field-icon">lock</mat-icon>
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                (click)="toggleConfirmPasswordVisibility()"
+                [attr.aria-label]="hideConfirmPassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'">
+                <mat-icon>{{ hideConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              @if (!registerForm.hasError('passwordMismatch') && isFieldValid('confirmPassword')) {
+                <mat-icon matSuffix class="success-icon">check_circle</mat-icon>
+              }
+              <mat-hint>Repita la contraseña</mat-hint>
+              @if (registerForm.get('confirmPassword')?.hasError('required') && registerForm.get('confirmPassword')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  Debe confirmar la contraseña
+                </mat-error>
+              }
+              @if (registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  Las contraseñas no coinciden
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- SECTION 2: Datos Fiscales -->
+        <div class="form-section" [class.section-valid]="isStepValid('fiscal')">
+          <div class="section-header">
+            <mat-icon class="section-icon">business_center</mat-icon>
+            <h3 class="section-title">Datos Fiscales</h3>
+          </div>
+          <div class="section-description">
+            Información fiscal de su empresa registrada en SET
+          </div>
+
+          <div class="form-grid">
+            <!-- RUC -->
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>RUC</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="ruc"
+                placeholder="12345678-9"
+                aria-label="Número de RUC"
+                maxlength="10">
+              <mat-icon matPrefix class="field-icon">badge</mat-icon>
+              @if (isFieldValid('ruc')) {
+                <mat-icon matSuffix class="success-icon">check_circle</mat-icon>
+              }
+              <mat-hint>Formato: 12345678-9</mat-hint>
+              @if (registerForm.get('ruc')?.hasError('required') && registerForm.get('ruc')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  El RUC es requerido
+                </mat-error>
+              }
+              @if (registerForm.get('ruc')?.hasError('pattern') && registerForm.get('ruc')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  Formato inválido. Use: 12345678-9
+                </mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Razón Social -->
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Razón Social</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="razonSocial"
+                placeholder="Mi Empresa S.A."
+                aria-label="Razón social de la empresa">
+              <mat-icon matPrefix class="field-icon">business</mat-icon>
+              @if (isFieldValid('razonSocial')) {
+                <mat-icon matSuffix class="success-icon">check_circle</mat-icon>
+              }
+              <mat-hint>Nombre legal de su empresa</mat-hint>
+              @if (registerForm.get('razonSocial')?.hasError('required') && registerForm.get('razonSocial')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  La razón social es requerida
+                </mat-error>
+              }
+              @if (registerForm.get('razonSocial')?.hasError('minlength') && registerForm.get('razonSocial')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  Debe tener al menos 3 caracteres
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Timbrado SET -->
+        <div class="form-section" [class.section-valid]="isStepValid('timbrado')">
+          <div class="section-header">
+            <mat-icon class="section-icon">verified</mat-icon>
+            <h3 class="section-title">Timbrado SET</h3>
+          </div>
+          <div class="section-description">
+            Datos del timbrado autorizado por la Subsecretaría de Estado de Tributación
+          </div>
+
+          <div class="form-grid">
+            <!-- Timbrado -->
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Número de Timbrado</mat-label>
+              <input
+                matInput
+                type="text"
+                formControlName="timbrado"
+                placeholder="12345678"
+                aria-label="Número de timbrado SET">
+              <mat-icon matPrefix class="field-icon">receipt_long</mat-icon>
+              @if (isFieldValid('timbrado')) {
+                <mat-icon matSuffix class="success-icon">check_circle</mat-icon>
+              }
+              <mat-hint>Mínimo 8 dígitos numéricos</mat-hint>
+              @if (registerForm.get('timbrado')?.hasError('required') && registerForm.get('timbrado')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  El timbrado es requerido
+                </mat-error>
+              }
+              @if (registerForm.get('timbrado')?.hasError('pattern') && registerForm.get('timbrado')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  Solo números permitidos
+                </mat-error>
+              }
+              @if (registerForm.get('timbrado')?.hasError('minlength') && registerForm.get('timbrado')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  Debe tener al menos 8 dígitos
+                </mat-error>
+              }
+            </mat-form-field>
+
+            <!-- Fecha Vencimiento -->
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>Fecha de Vencimiento</mat-label>
+              <input
+                matInput
+                [matDatepicker]="picker"
+                formControlName="timbradoVence"
+                placeholder="DD/MM/AAAA"
+                aria-label="Fecha de vencimiento del timbrado"
+                readonly>
+              <mat-icon matPrefix class="field-icon">event</mat-icon>
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              @if (isFieldValid('timbradoVence')) {
+                <mat-icon matSuffix class="success-icon date-success-icon">check_circle</mat-icon>
+              }
+              <mat-hint>Fecha en que vence su timbrado</mat-hint>
+              @if (registerForm.get('timbradoVence')?.hasError('required') && registerForm.get('timbradoVence')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  La fecha de vencimiento es requerida
+                </mat-error>
+              }
+              @if (registerForm.get('timbradoVence')?.hasError('futureDate') && registerForm.get('timbradoVence')?.touched) {
+                <mat-error>
+                  <mat-icon class="error-icon">error</mat-icon>
+                  La fecha debe ser posterior a hoy
+                </mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Alert Messages -->
+        @if (errorMessage()) {
+          <div class="alert alert-error" role="alert">
+            <mat-icon class="alert-icon">error</mat-icon>
+            <div class="alert-content">
+              <strong>Error:</strong> {{ errorMessage() }}
+            </div>
+          </div>
+        }
+
+        @if (successMessage()) {
+          <div class="alert alert-success" role="alert">
+            <mat-icon class="alert-icon">check_circle</mat-icon>
+            <div class="alert-content">
+              <strong>Éxito:</strong> {{ successMessage() }}
+            </div>
+          </div>
+        }
+
+        <!-- Submit Button -->
+        <div class="form-actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            class="submit-button"
+            [disabled]="registerForm.invalid || isLoading()"
+            aria-label="Enviar formulario de registro">
+            @if (isLoading()) {
+              <mat-spinner diameter="24" class="button-spinner"></mat-spinner>
+              <span>Procesando...</span>
+            } @else {
+              <mat-icon>how_to_reg</mat-icon>
+              <span>Crear Cuenta</span>
+            }
+          </button>
+        </div>
+      </form>
+
+      <!-- Footer Links -->
+      <div class="form-footer">
+        <p class="footer-text">
+          ¿Ya tienes una cuenta?
+          <a routerLink="/auth/login" class="footer-link">
+            Iniciar sesión
+            <mat-icon class="link-icon">arrow_forward</mat-icon>
+          </a>
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
