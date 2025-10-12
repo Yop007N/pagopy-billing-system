@@ -100,3 +100,6 @@ www/
 # Temporary files
 tmp/
 temp/
+CLAUDE.md
+.claude/
+push_to_github.sh
