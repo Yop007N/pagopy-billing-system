@@ -219,7 +219,6 @@ docker-compose logs -f
 
 ## Documentación
 
-- [CLAUDE.md](./CLAUDE.md) - Guía completa de desarrollo
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - Guía de despliegue
 
 ## Testing
