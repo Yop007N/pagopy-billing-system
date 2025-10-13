@@ -223,7 +223,6 @@ docker --version
 
 ## 📚 Más Información
 
-- [CLAUDE.md](./CLAUDE.md) - Guía completa de desarrollo
 - [README.md](./README.md) - Documentación del proyecto
 - Backend: [apps/backend/](./apps/backend/)
 - Frontend: [apps/web/](./apps/web/)
